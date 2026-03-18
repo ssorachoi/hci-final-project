@@ -8,50 +8,47 @@ import 'homepage.dart';
 class OnboardingContent {
   String title;
   String description;
-  IconData icon;
+  String imagePath; // Expects a String for the file path
 
   OnboardingContent({
     required this.title,
     required this.description,
-    required this.icon,
+    required this.imagePath,
   });
 }
 
-// 📝 EDIT TEXT AND ICONS HERE:
-// Change the titles, descriptions, and icons to match your specific app idea.
+// 📝 EDIT TEXT AND IMAGES HERE:
+// Make sure these file names match the actual .png files in your assets/ folder.
 List<OnboardingContent> contents = [
   OnboardingContent(
     title: 'Explore Multiple Subjects',
     description:
         'Go beyond basic math. Master Linear Algebra, Integral Calculus, Physics, and Chemistry all in one place.',
-    icon: Icons.search_rounded,
+    imagePath: 'assets/subjects.png',
   ),
   OnboardingContent(
     title: 'Challenge Your Skills',
     description:
         'Test your knowledge with curated quizzes tailored to your skill level, from Easy to Hard.',
-    icon: Icons.people_alt_rounded,
+    imagePath: 'assets/quiz.png',
   ),
   OnboardingContent(
     title: 'Earn Epic Badges',
     description:
         'Turn studying into a game. Unlock unique achievements like "Integration Specialist" as you conquer complex topics.',
-    icon:
-        Icons.rocket_launch_rounded, // Try changing this to Icons.check_circle
+    imagePath: 'assets/badge.png',
   ),
   OnboardingContent(
     title: 'Track Your Growth',
     description:
         'Monitor your quiz scores, see your completion rates, and watch your mastery grow over time.',
-    icon:
-        Icons.rocket_launch_rounded, // Try changing this to Icons.check_circle
+    imagePath: 'assets/progress.png',
   ),
   OnboardingContent(
     title: 'Study Your Way',
     description:
         'Create an account to save your milestones across devices, or dive right in as a guest to start learning immediately.',
-    icon:
-        Icons.rocket_launch_rounded, // Try changing this to Icons.check_circle
+    imagePath: 'assets/start.png',
   ),
 ];
 
@@ -66,7 +63,7 @@ class OnboardingScreen extends StatefulWidget {
 }
 
 class _OnboardingScreenState extends State<OnboardingScreen> {
-  // This variable remembers which page the user is currently looking at (0, 1, or 2).
+  // This variable remembers which page the user is currently looking at (0 to 4).
   int currentIndex = 0;
   late PageController _controller;
 
@@ -93,11 +90,12 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
       margin: const EdgeInsets.only(right: 5),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(20),
-        // 🎨 EDIT DOT COLORS HERE:
+        // Color of the active vs inactive dots
         color: currentIndex == index
-            ? Theme.of(context)
-                  .primaryColor // Color of the active dot
-            : Colors.grey.shade300, // Color of the inactive dots
+            ? Color(0xFF395886)
+            : Colors
+                  .grey
+                  .shade400, // Darkened slightly for better visibility on the new background
       ),
     );
   }
@@ -106,9 +104,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     // Scaffold provides the blank canvas for our screen.
     return Scaffold(
-      // 🎨 EDIT BACKGROUND COLOR HERE:
-      // Change Colors.white to Colors.black, Colors.blue.shade50, etc.
-      backgroundColor: Color(0xFFBFC7D1),
+      backgroundColor: const Color(0xFFBFC7D1),
 
       // SafeArea keeps our design from hiding behind the phone's camera notch.
       body: SafeArea(
@@ -131,33 +127,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // 🎨 EDIT ICON APPEARANCE HERE:
-                        Icon(
-                          contents[i].icon,
-                          size: 150, // Change how big the icon is
-                          color: Theme.of(context).primaryColor,
+                        // 🖼️ Displays your custom PNG assets
+                        Image.asset(
+                          contents[i].imagePath,
+                          height: 250,
+                          fit: BoxFit.contain,
                         ),
-                        const SizedBox(height: 40), // Adds empty space
-                        // 🎨 EDIT TITLE TEXT APPEARANCE HERE:
+
+                        const SizedBox(height: 40),
+
+                        // TITLE TEXT
                         Text(
                           contents[i].title,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 28,
                             fontWeight: FontWeight.bold,
-                            // You can add color: Colors.black, here!
+                            color: Colors.black87,
                           ),
                         ),
                         const SizedBox(height: 20),
 
-                        // 🎨 EDIT DESCRIPTION TEXT APPEARANCE HERE:
+                        // DESCRIPTION TEXT
                         Text(
                           contents[i].description,
                           textAlign: TextAlign.center,
                           style: const TextStyle(
                             fontSize: 16,
-                            color: Colors
-                                .grey, // Changes the description text color
+                            color: Colors.black54,
                           ),
                         ),
                       ],
@@ -180,10 +177,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                     onPressed: () {
                       _controller.jumpToPage(contents.length - 1);
                     },
-                    // 🎨 EDIT SKIP BUTTON TEXT COLOR HERE:
                     child: const Text(
                       "SKIP",
-                      style: TextStyle(color: Colors.grey),
+                      style: TextStyle(color: Colors.black54),
                     ),
                   ),
 
@@ -214,16 +210,11 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                         );
                       }
                     },
-                    // 🎨 EDIT NEXT/START BUTTON COLOR HERE:
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(
-                        context,
-                      ).primaryColor, // Button background color
-                      foregroundColor: Colors.white, // Button text color
+                      backgroundColor: Color(0xFF395886),
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(
-                          20,
-                        ), // Makes the button rounded
+                        borderRadius: BorderRadius.circular(20),
                       ),
                     ),
                     child: Text(

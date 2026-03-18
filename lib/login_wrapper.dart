@@ -89,7 +89,11 @@ class LoginScreen extends StatelessWidget {
                   ),
                   child: const Text(
                     "LOG IN",
-                    style: TextStyle(fontSize: 16, letterSpacing: 1),
+                    style: TextStyle(
+                      fontSize: 16,
+                      letterSpacing: 1,
+                      color: Colors.white,
+                    ),
                   ),
                 ),
               ),
@@ -133,7 +137,7 @@ class LoginScreen extends StatelessWidget {
                   );
                 },
                 style: OutlinedButton.styleFrom(
-                  side: const BorderSide(color: Colors.black54),
+                  side: const BorderSide(color: Color(0xFF395886)),
                   padding: const EdgeInsets.symmetric(
                     horizontal: 32,
                     vertical: 24,
@@ -144,7 +148,7 @@ class LoginScreen extends StatelessWidget {
                 ),
                 child: const Text(
                   "Continue as Guest",
-                  style: TextStyle(fontSize: 16),
+                  style: TextStyle(fontSize: 16, color: Colors.black),
                 ),
               ),
 
