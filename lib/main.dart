@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_native_splash/flutter_native_splash.dart';
 import 'package:hci_final_project/login_wrapper.dart';
+import 'package:hci_final_project/theme/app_theme.dart';
 import 'package:hci_final_project/onboardingscreen.dart';
 
 void main() {
@@ -12,6 +12,10 @@ class MainApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(home: const OnboardingScreen());
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      theme: buildAppTheme(),
+      home: const LoginScreen(),
+    );
   }
 }
