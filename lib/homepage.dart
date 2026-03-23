@@ -19,6 +19,10 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _showHomeContent = true;
+  bool _showSettingsContent = false;
+
+  bool get _isInMainTabs => !_showHomeContent && !_showSettingsContent;
+
   int _selectedAvatar = 0;
 
   final List<String> avatars = [
@@ -39,18 +43,25 @@ class _HomeScreenState extends State<HomeScreen> {
     Builder(builder: (context) => _subjectsContent(context)),
     const Center(child: Text("Progress Screen")),
     Builder(builder: (context) => _profileContent(context)),
+    Builder(builder: (context) => _settingsContent(context)),
   ];
 
   void _onItemTapped(int index) {
     setState(() {
       _selectedIndex = index;
       _showHomeContent = false;
+      _showSettingsContent = false;
     });
   }
 
-  void _navigateFromDrawer({int? bottomNavIndex, bool showHome = false}) {
+  void _navigateFromDrawer({
+    int? bottomNavIndex,
+    bool showHome = false,
+    bool showSettings = false,
+  }) {
     setState(() {
       _showHomeContent = showHome;
+      _showSettingsContent = showSettings;
       if (bottomNavIndex != null) {
         _selectedIndex = bottomNavIndex;
       }
@@ -155,9 +166,9 @@ class _HomeScreenState extends State<HomeScreen> {
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
-              decoration: BoxDecoration(color: Colors.blue),
+              decoration: BoxDecoration(color: Color(0xFF395886)),
               child: Text(
-                'Menu',
+                'MathMaster',
                 style: TextStyle(color: Colors.white, fontSize: 24),
               ),
             ),
@@ -177,24 +188,33 @@ class _HomeScreenState extends State<HomeScreen> {
               onTap: () => _navigateFromDrawer(bottomNavIndex: 1),
             ),
             ListTile(
+              leading: const Icon(Icons.person),
+              title: const Text('Profile'),
+              onTap: () => _navigateFromDrawer(bottomNavIndex: 2),
+            ),
+            ListTile(
               leading: const Icon(Icons.settings),
               title: const Text('Settings'),
-              onTap: () => _navigateFromDrawer(bottomNavIndex: 2),
+              onTap: () => _navigateFromDrawer(showSettings: true),
             ),
           ],
         ),
       ),
 
-      // ✅ Change body based on selected tab
-      body: _showHomeContent ? _homeContent(context) : _pages[_selectedIndex],
+      body: _showHomeContent
+          ? _homeContent(context)
+          : _showSettingsContent
+          ? _settingsContent(context)
+          : _pages[_selectedIndex],
 
-      // ✅ Bottom Navigation Bar
       bottomNavigationBar: SizedBox(
         height: sizes?.bottomNavHeight ?? 72,
         child: BottomNavigationBar(
           currentIndex: _selectedIndex,
           onTap: _onItemTapped,
-          selectedItemColor: Colors.black,
+
+          selectedItemColor: _isInMainTabs ? Colors.black : Colors.white,
+          unselectedItemColor: Colors.white,
 
           items: const [
             BottomNavigationBarItem(icon: Icon(Icons.book), label: 'Subjects'),
@@ -329,8 +349,12 @@ class _HomeScreenState extends State<HomeScreen> {
                     ElevatedButton(
                       onPressed: _showAvatarPicker,
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.blue[200],
+                        backgroundColor: Color(0xFF8AAEE0),
                         foregroundColor: Colors.black,
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(6),
+                          // side: BorderSide(color: Colors.black, width: 2),
+                        ),
                       ),
                       child: const Text("Change Avatar"),
                     ),
@@ -346,12 +370,18 @@ class _HomeScreenState extends State<HomeScreen> {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            child: const Column(
+            child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text("• Quizzes Completed: 12"),
+                Text(
+                  "• Quizzes Completed: 12",
+                  style: GoogleFonts.poppins(fontSize: 18),
+                ),
                 SizedBox(height: 8),
-                Text("• Badges Earned: 5"),
+                Text(
+                  "• Badges Earned: 5",
+                  style: GoogleFonts.poppins(fontSize: 18),
+                ),
               ],
             ),
           ),
@@ -365,9 +395,20 @@ class _HomeScreenState extends State<HomeScreen> {
               onPressed: () {},
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(200, 50),
-                backgroundColor: Color(0xFF7C9BCB),
+                backgroundColor: Color(0xFF8AAEE0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                  // side: BorderSide(color: Colors.black, width: 2),
+                ),
               ),
-              child: const Text("Settings"),
+              child: Text(
+                "Settings",
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
 
@@ -386,11 +427,38 @@ class _HomeScreenState extends State<HomeScreen> {
               },
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(220, 50),
-                backgroundColor: Color(0xFF7C9BCB),
+                backgroundColor: Color(0xFF8AAEE0),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(6),
+                ),
               ),
-              child: const Text("LOG OUT"),
+              child: Text(
+                "LOG OUT",
+                style: GoogleFonts.poppins(
+                  color: Colors.black,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
             ),
           ),
+        ],
+      ),
+    );
+  }
+
+  // Settings Page
+  Widget _settingsContent(BuildContext context) {
+    return Center(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          _buildButton(context, "Subjects", const Color(0xFF395886), () {
+            setState(() {
+              _showHomeContent = false;
+              _selectedIndex = 0;
+            });
+          }),
         ],
       ),
     );
