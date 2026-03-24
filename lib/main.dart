@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:hci_final_project/login_wrapper.dart';
 import 'package:hci_final_project/theme/app_theme.dart';
 import 'package:hci_final_project/onboardingscreen.dart';
+import 'package:hci_final_project/progress_page.dart';
 import 'homepage.dart';
 import 'local_storage.dart';
 
@@ -10,7 +11,7 @@ void main() async {
 
   bool loggedIn = await LocalStorage.isLoggedIn();
 
-  runApp(const MainApp(startLoggedIn: false));
+  runApp(MainApp(startLoggedIn: loggedIn));
 }
 
 class MainApp extends StatelessWidget {
@@ -34,7 +35,8 @@ class MainApp extends StatelessWidget {
           }
 
           bool loggedIn = snapshot.data ?? false;
-          return loggedIn ? const HomeScreen() : const LoginScreen();
+          return ProgressPage();
+          //return loggedIn ? const HomeScreen() : const LoginScreen();
         },
       ),
       routes: {
