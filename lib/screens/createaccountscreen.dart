@@ -38,19 +38,28 @@ class _CreateAccountScreenState extends State<CreateAccountScreen> {
     super.dispose();
   }
 
-  void _createAccount() {
+  void _createAccount() async {
     if (_formKey.currentState!.validate()) {
-      final username = _usernameController.text.trim();
-      final password = _passwordController.text.trim();
+      try {
+        await LocalStorage.createAccount(
+          firstName: _firstNameController.text.trim(),
+          lastName: _lastNameController.text.trim(),
+          middleInitial: _middleInitialController.text.trim(),
+          age: int.parse(_ageController.text.trim()),
+          phone: _phoneController.text.trim(),
+          email: _emailController.text.trim(),
+          username: _usernameController.text.trim(),
+          password: _passwordController.text.trim(),
+        );
 
-      // Prevent empty strings
-      if (username.isEmpty || password.isEmpty) return;
-
-      LocalStorage.createAccount(username, password).then((_) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(content: Text('Account created successfully!')),
         );
-      });
+      } catch (e) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text(e.toString())));
+      }
     }
   }
 
