@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/hover_scale.dart';
 
 class ProgressPage extends StatefulWidget {
   final Map<String, Map<String, dynamic>> progressData;
@@ -50,12 +51,14 @@ class _ProgressPageState extends State<ProgressPage> {
 
           const SizedBox(height: 20),
 
-          ElevatedButton(
-            onPressed: () => _confirmReset(context),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6F8FB3),
+          HoverScale(
+            child: ElevatedButton(
+              onPressed: () => _confirmReset(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFF6F8FB3),
+              ),
+              child: const Text("Reset Progress"),
             ),
-            child: const Text("Reset Progress"),
           ),
         ],
       ),
@@ -114,93 +117,97 @@ class _ProgressPageState extends State<ProgressPage> {
 
   // 🔥 CARD UI
   Widget _buildCard(String title, String quizzes, double progress) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD3D9E2),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
+    return HoverScale(
+      hoverScale: 1.06,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: const Color(0xFFD3D9E2),
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.15),
+              blurRadius: 10,
+              offset: const Offset(0, 6),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Text(
+              title,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            ),
 
-          const SizedBox(height: 8),
+            const SizedBox(height: 8),
 
-          Text("Quizzes Taken: $quizzes"),
+            Text("Quizzes Taken: $quizzes"),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 12),
 
-          // 🔥 PROGRESS BAR
-          TweenAnimationBuilder<double>(
-            key: ValueKey(animationKey),
-            tween: Tween(begin: 0, end: progress),
-            duration: const Duration(milliseconds: 1200),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, _) {
-              Color barColor;
-
-              if (value < 0.3) {
-                barColor = Colors.redAccent;
-              } else if (value < 0.7) {
-                barColor = Colors.orange;
-              } else {
-                barColor = Colors.green;
-              }
-
-              return Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: LinearProgressIndicator(
-                      value: value,
-                      minHeight: 10,
-                      backgroundColor: Colors.grey[300],
-                      color: barColor,
-                    ),
-                  ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "${(value * 100).toStringAsFixed(0)}%",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
-                  ),
-                ],
-              );
-            },
-          ),
-
-          const SizedBox(height: 12),
-
-          // 🏆 BADGE
-          if (progress >= 0.4)
+            // 🔥 PROGRESS BAR
             TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: 1),
-              duration: const Duration(milliseconds: 800),
+              key: ValueKey(animationKey),
+              tween: Tween(begin: 0, end: progress),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutCubic,
               builder: (context, value, _) {
-                return Transform.scale(
-                  scale: value,
-                  child: Opacity(
-                    opacity: value,
-                    child: Image.asset(
-                      "assets/onboardingscreen/badge.png",
-                      height: 40,
+                Color barColor;
+
+                if (value < 0.3) {
+                  barColor = Colors.redAccent;
+                } else if (value < 0.7) {
+                  barColor = Colors.orange;
+                } else {
+                  barColor = Colors.green;
+                }
+
+                return Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        minHeight: 10,
+                        backgroundColor: Colors.grey[300],
+                        color: barColor,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "${(value * 100).toStringAsFixed(0)}%",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 );
               },
             ),
-        ],
+
+            const SizedBox(height: 12),
+
+            // 🏆 BADGE
+            if (progress >= 0.4)
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                builder: (context, value, _) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value,
+                      child: Image.asset(
+                        "assets/onboardingscreen/badge.png",
+                        height: 40,
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
   }

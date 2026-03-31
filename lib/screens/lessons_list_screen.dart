@@ -5,8 +5,13 @@ import 'package:google_fonts/google_fonts.dart';
 
 class LessonDetailScreen extends StatefulWidget {
   final Lesson lesson;
+  final Color? themeColor;
 
-  const LessonDetailScreen({super.key, required this.lesson});
+  const LessonDetailScreen({
+    super.key,
+    required this.lesson,
+    this.themeColor,
+  });
 
   @override
   State<LessonDetailScreen> createState() => _LessonDetailScreenState();
@@ -31,6 +36,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
   Widget build(BuildContext context) {
     final section = widget.lesson.sections[currentIndex];
     final isLast = currentIndex == widget.lesson.sections.length - 1;
+    final themeColor = widget.themeColor;
 
     return Scaffold(
       appBar: AppBar(
@@ -90,10 +96,18 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: currentIndex > 0 ? _previousSection : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeColor,
+                      foregroundColor: Colors.black87,
+                    ),
                     child: const Text("Previous"),
                   ),
                   ElevatedButton(
                     onPressed: _nextSection,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeColor,
+                      foregroundColor: Colors.black87,
+                    ),
                     child: const Text("Next"),
                   ),
                 ],
@@ -111,10 +125,15 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                             MaterialPageRoute(
                               builder: (context) => QuizScreen(
                                 problems: widget.lesson.quizProblems,
+                                themeColor: themeColor,
                               ),
                             ),
                           );
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: themeColor,
+                          foregroundColor: Colors.black87,
+                        ),
                         child: const Text("Take Quiz"),
                       ),
                     ),
@@ -125,6 +144,12 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(
+                          color: themeColor ?? Colors.black54,
+                        ),
+                      ),
                       child: const Text("Back to Lessons"),
                     ),
                   ),
@@ -139,8 +164,13 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
 
 class LessonsScreen extends StatelessWidget {
   final List<Lesson> lessons;
+  final Color? themeColor;
 
-  const LessonsScreen({super.key, required this.lessons});
+  const LessonsScreen({
+    super.key,
+    required this.lessons,
+    this.themeColor,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +184,7 @@ class LessonsScreen extends StatelessWidget {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
+            color: themeColor,
             child: ListTile(
               leading: lesson.imagePath != null
                   ? Image.asset(
@@ -179,7 +210,10 @@ class LessonsScreen extends StatelessWidget {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LessonDetailScreen(lesson: lesson),
+                    builder: (context) => LessonDetailScreen(
+                      lesson: lesson,
+                      themeColor: themeColor,
+                    ),
                   ),
                 );
               },
