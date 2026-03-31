@@ -47,10 +47,7 @@ class _HoverScaleState extends State<HoverScale> {
           ),
           child: borderRadius == null
               ? widget.child
-              : ClipRRect(
-                  borderRadius: borderRadius,
-                  child: widget.child,
-                ),
+              : ClipRRect(borderRadius: borderRadius, child: widget.child),
         ),
       ),
     );

@@ -122,7 +122,7 @@ class SubjectsPage extends StatelessWidget {
       child: GestureDetector(
         onTap: onTap,
         child: HoverScale(
-          hoverScale: 1.06,
+          hoverScale: 1.04,
           borderRadius: BorderRadius.circular(16),
           child: Container(
             padding: const EdgeInsets.all(16),
@@ -131,9 +131,9 @@ class SubjectsPage extends StatelessWidget {
               borderRadius: BorderRadius.circular(16),
               boxShadow: [
                 BoxShadow(
-                  color: Colors.black.withOpacity(0.05),
-                  blurRadius: 10,
-                  offset: const Offset(0, 4),
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
               ],
             ),
@@ -168,10 +168,7 @@ class SubjectsPage extends StatelessWidget {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
-                        subtitle,
-                        style: const TextStyle(fontSize: 13),
-                      ),
+                      Text(subtitle, style: const TextStyle(fontSize: 13)),
                     ],
                   ),
                 ),

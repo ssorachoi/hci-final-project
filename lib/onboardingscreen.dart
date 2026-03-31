@@ -110,7 +110,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
   Widget build(BuildContext context) {
     // Scaffold provides the blank canvas for our screen.
     return Scaffold(
-      backgroundColor: const Color(0xFFBFC7D1),
+      backgroundColor: const Color(0xFFF2F6FC),
 
       // SafeArea keeps our design from hiding behind the phone's camera notch.
       body: SafeArea(

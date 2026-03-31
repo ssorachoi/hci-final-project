@@ -9,11 +9,7 @@ class QuizScreen extends StatefulWidget {
   final List<QuizProblem> problems;
   final Color? themeColor;
 
-  const QuizScreen({
-    super.key,
-    required this.problems,
-    this.themeColor,
-  });
+  const QuizScreen({super.key, required this.problems, this.themeColor});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -46,12 +42,11 @@ class _QuizScreenState extends State<QuizScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            QuizResultsScreen(
-              problems: widget.problems,
-              answers: answers,
-              themeColor: widget.themeColor,
-            ),
+        builder: (context) => QuizResultsScreen(
+          problems: widget.problems,
+          answers: answers,
+          themeColor: widget.themeColor,
+        ),
       ),
     );
   }

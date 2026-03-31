@@ -1,7 +1,10 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hci_final_project/login_wrapper.dart';
 import 'package:hci_final_project/widgets/bottom_nav_bar.dart';
+import 'package:hci_final_project/widgets/hover_scale.dart';
 import 'local_storage.dart';
 import 'package:hci_final_project/home_pages/profile_page.dart';
 import 'package:hci_final_project/home_pages/subjects_page.dart';
@@ -196,12 +199,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   @override
   Widget build(BuildContext context) {
-    // All pages use light blue background
-    const bgColor = Color(0xFFE1ECF6);
-
     return Scaffold(
       extendBody: true,
-      backgroundColor: bgColor,
+      backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
       appBar: AppBar(
         centerTitle: true,
@@ -217,71 +217,57 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
 
       drawer: Drawer(
-        backgroundColor: Colors.white,
-        child: Column(
-          children: [
-            DrawerHeader(
-              decoration: BoxDecoration(color: Colors.transparent),
-              child: Image.asset("assets/logo.png"),
+        backgroundColor: Colors.transparent,
+        child: ClipRRect(
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 12, sigmaY: 12),
+            child: Container(
+              color: const Color(0xFFF2F6FC).withOpacity(0.75),
+              child: Column(
+                children: [
+                  DrawerHeader(
+                    decoration: BoxDecoration(color: Colors.transparent),
+                    child: Image.asset("assets/logo.png"),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.home_outlined,
+                    label: "Home",
+                    onTap: () => _navigateFromDrawer(showHome: true),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.library_books_outlined,
+                    label: "Subjects",
+                    onTap: () => _navigateFromDrawer(bottomNavIndex: 2),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.trending_up_outlined,
+                    label: "Progress",
+                    onTap: () => _navigateFromDrawer(bottomNavIndex: 1),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.account_circle_outlined,
+                    label: "Profile",
+                    onTap: () => _navigateFromDrawer(bottomNavIndex: 3),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.settings_outlined,
+                    label: "Settings",
+                    onTap: () => _navigateFromDrawer(showSettings: true),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.info_outlined,
+                    label: "About",
+                    onTap: () {},
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.exit_to_app_outlined,
+                    label: "Logout",
+                    onTap: () => _navigateFromDrawer(bottomNavIndex: 2),
+                  ),
+                ],
+              ),
             ),
-
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.home_outlined),
-              title: Text('Home', style: GoogleFonts.inter()),
-              onTap: () => _navigateFromDrawer(showHome: true),
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.library_books_outlined),
-              title: Text('Subjects', style: GoogleFonts.inter()),
-              onTap: () => _navigateFromDrawer(bottomNavIndex: 2),
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.trending_up_outlined),
-              title: Text('Progress', style: GoogleFonts.inter()),
-              onTap: () => _navigateFromDrawer(bottomNavIndex: 1),
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.account_circle_outlined),
-              title: Text('Profile', style: GoogleFonts.inter()),
-              onTap: () => _navigateFromDrawer(bottomNavIndex: 3),
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.settings_outlined),
-              title: Text('Settings', style: GoogleFonts.inter()),
-              onTap: () => _navigateFromDrawer(showSettings: true),
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.info_outlined),
-              title: Text('About', style: GoogleFonts.inter()),
-              onTap: () {},
-            ),
-            ListTile(
-              contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
-              iconColor: Colors.black,
-              textColor: Colors.black,
-              leading: const Icon(Icons.exit_to_app_outlined),
-              title: Text('Logout', style: GoogleFonts.inter()),
-              onTap: () => _navigateFromDrawer(bottomNavIndex: 2),
-            ),
-          ],
+          ),
         ),
       ),
 
@@ -341,6 +327,26 @@ class _HomeScreenState extends State<HomeScreen> {
             );
           }),
         ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem({
+    required IconData icon,
+    required String label,
+    required VoidCallback onTap,
+  }) {
+    return HoverScale(
+      hoverScale: 1.01,
+      hoverShadows: const [],
+      borderRadius: BorderRadius.circular(12),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16.0),
+        iconColor: Colors.black,
+        textColor: Colors.black,
+        leading: Icon(icon),
+        title: Text(label, style: GoogleFonts.inter()),
+        onTap: onTap,
       ),
     );
   }

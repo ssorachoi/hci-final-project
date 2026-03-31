@@ -7,11 +7,7 @@ class LessonDetailScreen extends StatefulWidget {
   final Lesson lesson;
   final Color? themeColor;
 
-  const LessonDetailScreen({
-    super.key,
-    required this.lesson,
-    this.themeColor,
-  });
+  const LessonDetailScreen({super.key, required this.lesson, this.themeColor});
 
   @override
   State<LessonDetailScreen> createState() => _LessonDetailScreenState();
@@ -146,9 +142,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                       },
                       style: OutlinedButton.styleFrom(
                         foregroundColor: Colors.black87,
-                        side: BorderSide(
-                          color: themeColor ?? Colors.black54,
-                        ),
+                        side: BorderSide(color: themeColor ?? Colors.black54),
                       ),
                       child: const Text("Back to Lessons"),
                     ),
@@ -166,11 +160,7 @@ class LessonsScreen extends StatelessWidget {
   final List<Lesson> lessons;
   final Color? themeColor;
 
-  const LessonsScreen({
-    super.key,
-    required this.lessons,
-    this.themeColor,
-  });
+  const LessonsScreen({super.key, required this.lessons, this.themeColor});
 
   @override
   Widget build(BuildContext context) {

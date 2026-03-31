@@ -55,7 +55,8 @@ class _ProgressPageState extends State<ProgressPage> {
             child: ElevatedButton(
               onPressed: () => _confirmReset(context),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF6F8FB3),
+                backgroundColor: const Color(0xFFE41619),
+                foregroundColor: Colors.white,
               ),
               child: const Text("Reset Progress"),
             ),
@@ -81,6 +82,10 @@ class _ProgressPageState extends State<ProgressPage> {
             ),
             ElevatedButton(
               onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE41619),
+                foregroundColor: Colors.white,
+              ),
               child: const Text("Reset"),
             ),
           ],
@@ -117,29 +122,62 @@ class _ProgressPageState extends State<ProgressPage> {
 
   // 🔥 CARD UI
   Widget _buildCard(String title, String quizzes, double progress) {
+    final cardColor = _cardColorForTitle(title);
+    final iconPath = _iconPathForTitle(title);
+
     return HoverScale(
-      hoverScale: 1.06,
+      hoverScale: 1.04,
+      hoverShadows: const [
+        BoxShadow(
+          color: Color(0x0A000000),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+      ],
       borderRadius: BorderRadius.circular(16),
       child: Container(
         width: double.infinity,
         margin: const EdgeInsets.only(bottom: 20),
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
-          color: const Color(0xFFD3D9E2),
+          color: cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.15),
-              blurRadius: 10,
-              offset: const Offset(0, 6),
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
             ),
           ],
         ),
         child: Column(
           children: [
-            Text(
-              title,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
+            Row(
+              children: [
+                if (iconPath != null)
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(iconPath),
+                    ),
+                  ),
+                if (iconPath != null) const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
 
             const SizedBox(height: 8),
@@ -210,5 +248,35 @@ class _ProgressPageState extends State<ProgressPage> {
         ),
       ),
     );
+  }
+
+  Color _cardColorForTitle(String title) {
+    switch (title) {
+      case "Linear Algebra":
+        return const Color(0xFFFBF0F7);
+      case "Integral Calculus":
+        return const Color(0xFFE2F2EF);
+      case "Physics":
+        return const Color(0xFFF3F1EC);
+      case "Chemistry":
+        return const Color(0xFFFAF1C2);
+      default:
+        return const Color(0xFFF2F6FC);
+    }
+  }
+
+  String? _iconPathForTitle(String title) {
+    switch (title) {
+      case "Linear Algebra":
+        return "assets/icons/linear.png";
+      case "Integral Calculus":
+        return "assets/icons/calculus.png";
+      case "Physics":
+        return "assets/icons/physics.png";
+      case "Chemistry":
+        return "assets/icons/chemistry.png";
+      default:
+        return null;
+    }
   }
 }
