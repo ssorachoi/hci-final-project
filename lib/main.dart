@@ -23,8 +23,8 @@ class MainApp extends StatelessWidget {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: buildAppTheme(),
-      home: FutureBuilder<bool>(
-        future: LocalStorage.isLoggedIn(),
+      home: FutureBuilder<Map<String, bool>>(
+        future: _loadStartupState(),
         builder: (context, snapshot) {
           if (!snapshot.hasData) {
             // Show loading spinner while checking storage
@@ -33,7 +33,14 @@ class MainApp extends StatelessWidget {
             );
           }
 
-          bool loggedIn = snapshot.data ?? false;
+          final startupState = snapshot.data!;
+          final hasSeenOnboarding = startupState['hasSeenOnboarding'] ?? false;
+          final loggedIn = startupState['loggedIn'] ?? false;
+
+          if (!hasSeenOnboarding) {
+            return const OnboardingScreen();
+          }
+
           return loggedIn ? const HomeScreen() : const LoginScreen();
         },
       ),
@@ -43,5 +50,12 @@ class MainApp extends StatelessWidget {
         // '/dragdrop': (context) => const DragAndDropTest(),
       },
     );
+  }
+
+  Future<Map<String, bool>> _loadStartupState() async {
+    final seenOnboarding = await LocalStorage.hasSeenOnboarding();
+    final loggedIn = await LocalStorage.isLoggedIn();
+
+    return {'hasSeenOnboarding': seenOnboarding, 'loggedIn': loggedIn};
   }
 }

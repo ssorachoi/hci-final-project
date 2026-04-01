@@ -5,8 +5,9 @@ import 'package:google_fonts/google_fonts.dart';
 
 class LessonDetailScreen extends StatefulWidget {
   final Lesson lesson;
+  final Color? themeColor;
 
-  const LessonDetailScreen({super.key, required this.lesson});
+  const LessonDetailScreen({super.key, required this.lesson, this.themeColor});
 
   @override
   State<LessonDetailScreen> createState() => _LessonDetailScreenState();
@@ -31,6 +32,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
   Widget build(BuildContext context) {
     final section = widget.lesson.sections[currentIndex];
     final isLast = currentIndex == widget.lesson.sections.length - 1;
+    final themeColor = widget.themeColor;
 
     return Scaffold(
       appBar: AppBar(
@@ -59,7 +61,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
 
                     Text(
                       section.content,
-                      style: GoogleFonts.inter(fontSize: 16),
+                      style: GoogleFonts.inter(fontSize: 14),
                     ),
 
                     if (section.message != null) ...[
@@ -90,10 +92,18 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                 children: [
                   ElevatedButton(
                     onPressed: currentIndex > 0 ? _previousSection : null,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeColor,
+                      foregroundColor: Colors.black87,
+                    ),
                     child: const Text("Previous"),
                   ),
                   ElevatedButton(
                     onPressed: _nextSection,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: themeColor,
+                      foregroundColor: Colors.black87,
+                    ),
                     child: const Text("Next"),
                   ),
                 ],
@@ -111,10 +121,15 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                             MaterialPageRoute(
                               builder: (context) => QuizScreen(
                                 problems: widget.lesson.quizProblems,
+                                themeColor: themeColor,
                               ),
                             ),
                           );
                         },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: themeColor,
+                          foregroundColor: Colors.black87,
+                        ),
                         child: const Text("Take Quiz"),
                       ),
                     ),
@@ -125,6 +140,10 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                       onPressed: () {
                         Navigator.pop(context);
                       },
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: Colors.black87,
+                        side: BorderSide(color: themeColor ?? Colors.black54),
+                      ),
                       child: const Text("Back to Lessons"),
                     ),
                   ),
@@ -139,8 +158,9 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
 
 class LessonsScreen extends StatelessWidget {
   final List<Lesson> lessons;
+  final Color? themeColor;
 
-  const LessonsScreen({super.key, required this.lessons});
+  const LessonsScreen({super.key, required this.lessons, this.themeColor});
 
   @override
   Widget build(BuildContext context) {
@@ -154,6 +174,7 @@ class LessonsScreen extends StatelessWidget {
 
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
+            color: themeColor,
             child: ListTile(
               leading: lesson.imagePath != null
                   ? Image.asset(
@@ -162,24 +183,30 @@ class LessonsScreen extends StatelessWidget {
                       height: 50,
                       fit: BoxFit.cover,
                     )
-                  : null,
+                  : const Icon(
+                      Icons.menu_book_rounded,
+                      size: 32,
+                    ),
               title: Text(
                 lesson.title,
                 style: GoogleFonts.poppins(
-                  fontSize: 22,
+                  fontSize: 16,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               subtitle: Text(
                 lesson.description,
-                style: GoogleFonts.poppins(fontSize: 16),
+                style: GoogleFonts.poppins(fontSize: 12),
               ),
               trailing: const Icon(Icons.arrow_forward),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
-                    builder: (context) => LessonDetailScreen(lesson: lesson),
+                    builder: (context) => LessonDetailScreen(
+                      lesson: lesson,
+                      themeColor: themeColor,
+                    ),
                   ),
                 );
               },

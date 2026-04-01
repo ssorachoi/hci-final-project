@@ -7,8 +7,9 @@ import '../widgets/typing.dart';
 
 class QuizScreen extends StatefulWidget {
   final List<QuizProblem> problems;
+  final Color? themeColor;
 
-  const QuizScreen({super.key, required this.problems});
+  const QuizScreen({super.key, required this.problems, this.themeColor});
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -41,8 +42,11 @@ class _QuizScreenState extends State<QuizScreen> {
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(
-        builder: (context) =>
-            QuizResultsScreen(problems: widget.problems, answers: answers),
+        builder: (context) => QuizResultsScreen(
+          problems: widget.problems,
+          answers: answers,
+          themeColor: widget.themeColor,
+        ),
       ),
     );
   }
@@ -51,6 +55,7 @@ class _QuizScreenState extends State<QuizScreen> {
   Widget build(BuildContext context) {
     final problem = widget.problems[currentIndex];
     final userAnswer = answers[currentIndex];
+    final themeColor = widget.themeColor;
 
     Widget questionWidget;
 
@@ -105,10 +110,18 @@ class _QuizScreenState extends State<QuizScreen> {
               children: [
                 ElevatedButton(
                   onPressed: currentIndex > 0 ? _previousQuestion : null,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeColor,
+                    foregroundColor: Colors.black87,
+                  ),
                   child: const Text("Previous"),
                 ),
                 ElevatedButton(
                   onPressed: _nextQuestion,
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: themeColor,
+                    foregroundColor: Colors.black87,
+                  ),
                   child: Text(isLastQuestion ? "Finish" : "Next"),
                 ),
               ],
@@ -124,11 +137,13 @@ class _QuizScreenState extends State<QuizScreen> {
 class QuizResultsScreen extends StatelessWidget {
   final List<QuizProblem> problems;
   final Map<int, String> answers;
+  final Color? themeColor;
 
   const QuizResultsScreen({
     super.key,
     required this.problems,
     required this.answers,
+    this.themeColor,
   });
 
   @override
@@ -185,6 +200,10 @@ class QuizResultsScreen extends StatelessWidget {
                   Navigator.pop(context); // Results → LessonDetail
                   Navigator.pop(context); // LessonDetail → LessonsScreen
                 },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: themeColor,
+                  foregroundColor: Colors.black87,
+                ),
                 child: const Text("Back to Lessons"),
               ),
             ),

@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 class LocalStorage {
   static const _keyIsLoggedIn = 'isLoggedIn';
   static const _keyAccounts = 'accounts';
+  static const _keyHasSeenOnboarding = 'hasSeenOnboarding';
 
   // Save login state
   static Future<void> setLoggedIn(bool value) async {
@@ -15,6 +16,16 @@ class LocalStorage {
   static Future<bool> isLoggedIn() async {
     final prefs = await SharedPreferences.getInstance();
     return prefs.getBool(_keyIsLoggedIn) ?? false;
+  }
+
+  static Future<void> setHasSeenOnboarding(bool value) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool(_keyHasSeenOnboarding, value);
+  }
+
+  static Future<bool> hasSeenOnboarding() async {
+    final prefs = await SharedPreferences.getInstance();
+    return prefs.getBool(_keyHasSeenOnboarding) ?? false;
   }
 
   // Reset login state (for testing / logout)

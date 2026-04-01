@@ -30,7 +30,7 @@ class AppSizes extends ThemeExtension<AppSizes> {
 
 ThemeData buildAppTheme() {
   const primary = Color(0xFF395886);
-  const surface = Color(0xFFE1ECF6);
+  const surface = Color(0xFFF2F6FC);
   const appSizes = AppSizes(appBarHeight: 66, bottomNavHeight: 72);
 
   return ThemeData(

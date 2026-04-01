@@ -5,6 +5,7 @@ import '../data/lessons/integral_calculus.dart';
 import '../data/lessons/physics.dart';
 import '../data/lessons/chemistry.dart';
 import '../screens/lessons_list_screen.dart';
+import '../widgets/hover_scale.dart';
 
 class SubjectsPage extends StatelessWidget {
   const SubjectsPage({super.key});
@@ -32,13 +33,16 @@ class SubjectsPage extends StatelessWidget {
             context,
             title: "Linear Algebra",
             subtitle: "Matrices, vectors, spaces",
-            color: const Color(0xFF6C8CD5),
+            color: const Color(0xFFFBF0F7),
             iconPath: "assets/icons/linear.png",
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LessonsScreen(lessons: linearAlgebraLessons),
+                  builder: (_) => LessonsScreen(
+                    lessons: linearAlgebraLessons,
+                    themeColor: const Color(0xFFFBF0F7),
+                  ),
                 ),
               );
             },
@@ -48,14 +52,16 @@ class SubjectsPage extends StatelessWidget {
             context,
             title: "Integral Calculus",
             subtitle: "Integration, areas",
-            color: const Color(0xFF8E7DBE),
+            color: const Color(0xFFE2F2EF),
             iconPath: "assets/icons/calculus.png",
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) =>
-                      LessonsScreen(lessons: integralCalculusLessons),
+                  builder: (_) => LessonsScreen(
+                    lessons: integralCalculusLessons,
+                    themeColor: const Color(0xFFE2F2EF),
+                  ),
                 ),
               );
             },
@@ -65,13 +71,16 @@ class SubjectsPage extends StatelessWidget {
             context,
             title: "Physics",
             subtitle: "Motion, energy, forces",
-            color: const Color(0xFF5DA399),
+            color: const Color(0xFFF3F1EC),
             iconPath: "assets/icons/physics.png",
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LessonsScreen(lessons: physicsLessons),
+                  builder: (_) => LessonsScreen(
+                    lessons: physicsLessons,
+                    themeColor: const Color(0xFFF3F1EC),
+                  ),
                 ),
               );
             },
@@ -81,13 +90,16 @@ class SubjectsPage extends StatelessWidget {
             context,
             title: "Chemistry",
             subtitle: "Atoms, reactions",
-            color: const Color(0xFFE07A5F),
+            color: const Color(0xFFFAF1C2),
             iconPath: "assets/icons/chemistry.png",
             onTap: () {
               Navigator.push(
                 context,
                 MaterialPageRoute(
-                  builder: (_) => LessonsScreen(lessons: chemistryLessons),
+                  builder: (_) => LessonsScreen(
+                    lessons: chemistryLessons,
+                    themeColor: const Color(0xFFFAF1C2),
+                  ),
                 ),
               );
             },
@@ -109,61 +121,62 @@ class SubjectsPage extends StatelessWidget {
       padding: const EdgeInsets.only(bottom: 16),
       child: GestureDetector(
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withOpacity(0.85),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.05),
-                blurRadius: 10,
-                offset: const Offset(0, 4),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              // 🔹 ICON
-              Container(
-                width: 50,
-                height: 50,
-                decoration: BoxDecoration(
-                  color: color.withOpacity(0.15),
-                  borderRadius: BorderRadius.circular(12),
+        child: HoverScale(
+          hoverScale: 1.04,
+          borderRadius: BorderRadius.circular(16),
+          child: Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: color,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.08),
+                  blurRadius: 12,
+                  offset: const Offset(0, 6),
                 ),
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: Image.asset(iconPath),
+              ],
+            ),
+            child: Row(
+              children: [
+                // 🔹 ICON
+                Container(
+                  width: 50,
+                  height: 50,
+                  decoration: BoxDecoration(
+                    color: Colors.white.withOpacity(0.6),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Image.asset(iconPath),
+                  ),
                 ),
-              ),
 
-              const SizedBox(width: 16),
+                const SizedBox(width: 16),
 
-              // 🔹 TEXT
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      title,
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
+                // 🔹 TEXT
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        title,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 4),
-                    Text(
-                      subtitle,
-                      style: TextStyle(color: Colors.grey[600], fontSize: 13),
-                    ),
-                  ],
+                      const SizedBox(height: 4),
+                      Text(subtitle, style: const TextStyle(fontSize: 13)),
+                    ],
+                  ),
                 ),
-              ),
 
-              // 🔹 ARROW
-              const Icon(Icons.arrow_forward_ios_rounded, size: 18),
-            ],
+                // 🔹 ARROW
+                const Icon(Icons.arrow_forward_ios_rounded, size: 18),
+              ],
+            ),
           ),
         ),
       ),

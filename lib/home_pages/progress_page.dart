@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../widgets/hover_scale.dart';
 
 class ProgressPage extends StatefulWidget {
   final Map<String, Map<String, dynamic>> progressData;
@@ -30,8 +31,10 @@ class _ProgressPageState extends State<ProgressPage> {
 
   @override
   Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).padding.bottom;
+
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(20, 20, 20, 120 + bottomInset),
       child: Column(
         children: [
           ...widget.progressData.entries.toList().asMap().entries.map((entry) {
@@ -48,16 +51,51 @@ class _ProgressPageState extends State<ProgressPage> {
 
           const SizedBox(height: 20),
 
-          ElevatedButton(
-            onPressed: widget.onReset,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF6F8FB3),
+          HoverScale(
+            child: ElevatedButton(
+              onPressed: () => _confirmReset(context),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE41619),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Reset Progress"),
             ),
-            child: const Text("Reset Progress"),
           ),
         ],
       ),
     );
+  }
+
+  Future<void> _confirmReset(BuildContext context) async {
+    final shouldReset = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text("Reset progress?"),
+          content: const Text(
+            "This will clear all progress. Do you want to continue?",
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: const Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFE41619),
+                foregroundColor: Colors.white,
+              ),
+              child: const Text("Reset"),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (shouldReset == true) {
+      widget.onReset();
+    }
   }
 
   // 🔥 CARD ANIMATION
@@ -84,94 +122,161 @@ class _ProgressPageState extends State<ProgressPage> {
 
   // 🔥 CARD UI
   Widget _buildCard(String title, String quizzes, double progress) {
-    return Container(
-      width: double.infinity,
-      margin: const EdgeInsets.only(bottom: 20),
-      padding: const EdgeInsets.all(15),
-      decoration: BoxDecoration(
-        color: const Color(0xFFD3D9E2),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withOpacity(0.15),
-            blurRadius: 10,
-            offset: const Offset(0, 6),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Text(
-            title,
-            style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
-          ),
+    final cardColor = _cardColorForTitle(title);
+    final iconPath = _iconPathForTitle(title);
 
-          const SizedBox(height: 8),
-
-          Text("Quizzes Taken: $quizzes"),
-
-          const SizedBox(height: 12),
-
-          // 🔥 PROGRESS BAR
-          TweenAnimationBuilder<double>(
-            key: ValueKey(animationKey),
-            tween: Tween(begin: 0, end: progress),
-            duration: const Duration(milliseconds: 1200),
-            curve: Curves.easeOutCubic,
-            builder: (context, value, _) {
-              Color barColor;
-
-              if (value < 0.3) {
-                barColor = Colors.redAccent;
-              } else if (value < 0.7) {
-                barColor = Colors.orange;
-              } else {
-                barColor = Colors.green;
-              }
-
-              return Column(
-                children: [
-                  ClipRRect(
-                    borderRadius: BorderRadius.circular(12),
-                    child: LinearProgressIndicator(
-                      value: value,
-                      minHeight: 10,
-                      backgroundColor: Colors.grey[300],
-                      color: barColor,
+    return HoverScale(
+      hoverScale: 1.04,
+      hoverShadows: const [
+        BoxShadow(
+          color: Color(0x0A000000),
+          blurRadius: 4,
+          offset: Offset(0, 2),
+        ),
+      ],
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        width: double.infinity,
+        margin: const EdgeInsets.only(bottom: 20),
+        padding: const EdgeInsets.all(15),
+        decoration: BoxDecoration(
+          color: cardColor,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.08),
+              blurRadius: 6,
+              offset: const Offset(0, 3),
+            ),
+          ],
+        ),
+        child: Column(
+          children: [
+            Row(
+              children: [
+                if (iconPath != null)
+                  Container(
+                    width: 44,
+                    height: 44,
+                    decoration: BoxDecoration(
+                      color: Colors.white.withOpacity(0.6),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Image.asset(iconPath),
                     ),
                   ),
-                  const SizedBox(height: 6),
-                  Text(
-                    "${(value * 100).toStringAsFixed(0)}%",
-                    style: const TextStyle(fontWeight: FontWeight.bold),
+                if (iconPath != null) const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    title,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      fontSize: 16,
+                    ),
                   ),
-                ],
-              );
-            },
-          ),
+                ),
+              ],
+            ),
 
-          const SizedBox(height: 12),
+            const SizedBox(height: 8),
 
-          // 🏆 BADGE
-          if (progress >= 0.4)
+            Text("Quizzes Taken: $quizzes"),
+
+            const SizedBox(height: 12),
+
+            // 🔥 PROGRESS BAR
             TweenAnimationBuilder<double>(
-              tween: Tween(begin: 0, end: 1),
-              duration: const Duration(milliseconds: 800),
+              key: ValueKey(animationKey),
+              tween: Tween(begin: 0, end: progress),
+              duration: const Duration(milliseconds: 1200),
+              curve: Curves.easeOutCubic,
               builder: (context, value, _) {
-                return Transform.scale(
-                  scale: value,
-                  child: Opacity(
-                    opacity: value,
-                    child: Image.asset(
-                      "assets/onboardingscreen/badge.png",
-                      height: 40,
+                Color barColor;
+
+                if (value < 0.3) {
+                  barColor = Colors.redAccent;
+                } else if (value < 0.7) {
+                  barColor = Colors.orange;
+                } else {
+                  barColor = Colors.green;
+                }
+
+                return Column(
+                  children: [
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: LinearProgressIndicator(
+                        value: value,
+                        minHeight: 10,
+                        backgroundColor: Colors.grey[300],
+                        color: barColor,
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 6),
+                    Text(
+                      "${(value * 100).toStringAsFixed(0)}%",
+                      style: const TextStyle(fontWeight: FontWeight.bold),
+                    ),
+                  ],
                 );
               },
             ),
-        ],
+
+            const SizedBox(height: 12),
+
+            // 🏆 BADGE
+            if (progress >= 0.4)
+              TweenAnimationBuilder<double>(
+                tween: Tween(begin: 0, end: 1),
+                duration: const Duration(milliseconds: 800),
+                builder: (context, value, _) {
+                  return Transform.scale(
+                    scale: value,
+                    child: Opacity(
+                      opacity: value,
+                      child: Image.asset(
+                        "assets/onboardingscreen/badge.png",
+                        height: 40,
+                      ),
+                    ),
+                  );
+                },
+              ),
+          ],
+        ),
       ),
     );
+  }
+
+  Color _cardColorForTitle(String title) {
+    switch (title) {
+      case "Linear Algebra":
+        return const Color(0xFFFBF0F7);
+      case "Integral Calculus":
+        return const Color(0xFFE2F2EF);
+      case "Physics":
+        return const Color(0xFFF3F1EC);
+      case "Chemistry":
+        return const Color(0xFFFAF1C2);
+      default:
+        return const Color(0xFFF2F6FC);
+    }
+  }
+
+  String? _iconPathForTitle(String title) {
+    switch (title) {
+      case "Linear Algebra":
+        return "assets/icons/linear.png";
+      case "Integral Calculus":
+        return "assets/icons/calculus.png";
+      case "Physics":
+        return "assets/icons/physics.png";
+      case "Chemistry":
+        return "assets/icons/chemistry.png";
+      default:
+        return null;
+    }
   }
 }
