@@ -842,13 +842,24 @@ class _HomeScreenState extends State<HomeScreen> {
     required String label,
     required VoidCallback onTap,
   }) {
-    return ListTile(
-      leading: Icon(icon, color: const Color(0xFF395886)),
-      title: Text(
-        label,
-        style: GoogleFonts.poppins(fontSize: 14, fontWeight: FontWeight.w500),
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(10),
+        hoverColor: Colors.white.withOpacity(0.22),
+        splashColor: Colors.white.withOpacity(0.18),
+        child: ListTile(
+          leading: Icon(icon, color: const Color(0xFF395886)),
+          title: Text(
+            label,
+            style: GoogleFonts.poppins(
+              fontSize: 14,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ),
       ),
-      onTap: onTap,
     );
   }
 }
