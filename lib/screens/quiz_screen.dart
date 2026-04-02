@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../models/quiz_problem.dart';
+import '../progress_manager.dart';
+import '../quest_manager.dart';
 import '../widgets/drag_drop.dart';
 import '../widgets/multiple_choice.dart';
 import '../widgets/true_or_false.dart';
@@ -8,8 +10,14 @@ import '../widgets/typing.dart';
 class QuizScreen extends StatefulWidget {
   final List<QuizProblem> problems;
   final Color? themeColor;
+  final String lessonTitle;
 
-  const QuizScreen({super.key, required this.problems, this.themeColor});
+  const QuizScreen({
+    super.key,
+    required this.problems,
+    required this.lessonTitle,
+    this.themeColor,
+  });
 
   @override
   State<QuizScreen> createState() => _QuizScreenState();
@@ -45,6 +53,7 @@ class _QuizScreenState extends State<QuizScreen> {
         builder: (context) => QuizResultsScreen(
           problems: widget.problems,
           answers: answers,
+          lessonTitle: widget.lessonTitle,
           themeColor: widget.themeColor,
         ),
       ),
@@ -104,7 +113,16 @@ class _QuizScreenState extends State<QuizScreen> {
         padding: const EdgeInsets.all(24),
         child: Column(
           children: [
-            Expanded(child: questionWidget),
+            Expanded(
+              child: Center(
+                child: SingleChildScrollView(
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxWidth: 700),
+                    child: questionWidget,
+                  ),
+                ),
+              ),
+            ),
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
@@ -134,17 +152,72 @@ class _QuizScreenState extends State<QuizScreen> {
 }
 
 /// Simple Results Screen
-class QuizResultsScreen extends StatelessWidget {
+class QuizResultsScreen extends StatefulWidget {
   final List<QuizProblem> problems;
   final Map<int, String> answers;
+  final String lessonTitle;
   final Color? themeColor;
 
   const QuizResultsScreen({
     super.key,
     required this.problems,
     required this.answers,
+    required this.lessonTitle,
     this.themeColor,
   });
+
+  @override
+  State<QuizResultsScreen> createState() => _QuizResultsScreenState();
+}
+
+class _QuizResultsScreenState extends State<QuizResultsScreen> {
+  QuestCompletionResult? _rewardResult;
+
+  @override
+  void initState() {
+    super.initState();
+    _completeRelatedQuests();
+  }
+
+  Future<void> _completeRelatedQuests() async {
+    final totalQuestions = widget.problems.length;
+    final correctAnswers = widget.answers.entries.where((entry) {
+      final index = entry.key;
+      final answer = entry.value;
+      if (index < 0 || index >= widget.problems.length) {
+        return false;
+      }
+      return answer == widget.problems[index].answer;
+    }).length;
+
+    await ProgressManager.recordQuizCompletion(
+      lessonTitle: widget.lessonTitle,
+      correctAnswers: correctAnswers,
+      totalQuestions: totalQuestions,
+    );
+
+    final result = await QuestManager.completeQuestsForLesson(
+      lessonTitle: widget.lessonTitle,
+    );
+    if (!mounted) return;
+
+    setState(() {
+      _rewardResult = result;
+    });
+
+    if (result.hasRewards) {
+      final questCount = result.completedQuests.length;
+      final questLabel = questCount == 1 ? 'quest' : 'quests';
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Completed $questCount $questLabel. '
+            '+${result.totalExpReward} EXP, +${result.totalCoinReward} coins.',
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -152,14 +225,30 @@ class QuizResultsScreen extends StatelessWidget {
       appBar: AppBar(title: const Text("Results")),
       body: Column(
         children: [
+          if (_rewardResult?.hasRewards == true)
+            Container(
+              width: double.infinity,
+              margin: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.green.withValues(alpha: 0.12),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Text(
+                'Daily quest rewards collected: '
+                '+${_rewardResult!.totalExpReward} EXP, '
+                '+${_rewardResult!.totalCoinReward} coins',
+              ),
+            ),
+
           // 🔹 LIST
           Expanded(
             child: ListView.builder(
               padding: const EdgeInsets.all(16),
-              itemCount: problems.length,
+              itemCount: widget.problems.length,
               itemBuilder: (context, index) {
-                final problem = problems[index];
-                final userAnswer = answers[index] ?? "No answer";
+                final problem = widget.problems[index];
+                final userAnswer = widget.answers[index] ?? "No answer";
                 final correct = userAnswer == problem.answer;
 
                 return Card(
@@ -201,7 +290,7 @@ class QuizResultsScreen extends StatelessWidget {
                   Navigator.pop(context); // LessonDetail → LessonsScreen
                 },
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: themeColor,
+                  backgroundColor: widget.themeColor,
                   foregroundColor: Colors.black87,
                 ),
                 child: const Text("Back to Lessons"),

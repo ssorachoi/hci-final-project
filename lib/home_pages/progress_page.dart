@@ -1,15 +1,9 @@
 import 'package:flutter/material.dart';
+import '../progress_manager.dart';
 import '../widgets/hover_scale.dart';
 
 class ProgressPage extends StatefulWidget {
-  final Map<String, Map<String, dynamic>> progressData;
-  final VoidCallback onReset;
-
-  const ProgressPage({
-    super.key,
-    required this.progressData,
-    required this.onReset,
-  });
+  const ProgressPage({super.key});
 
   @override
   State<ProgressPage> createState() => _ProgressPageState();
@@ -17,6 +11,8 @@ class ProgressPage extends StatefulWidget {
 
 class _ProgressPageState extends State<ProgressPage> {
   int animationKey = 0;
+  bool _loading = true;
+  List<SubjectProgressData> _subjectProgress = const [];
 
   @override
   void didChangeDependencies() {
@@ -27,25 +23,42 @@ class _ProgressPageState extends State<ProgressPage> {
         animationKey++;
       });
     });
+
+    _loadProgress();
+  }
+
+  Future<void> _loadProgress() async {
+    final snapshot = await ProgressManager.getProgressSnapshot();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _subjectProgress = snapshot.subjects;
+      _loading = false;
+    });
   }
 
   @override
   Widget build(BuildContext context) {
     final bottomInset = MediaQuery.of(context).padding.bottom;
 
+    if (_loading) {
+      return const Center(child: CircularProgressIndicator());
+    }
+
     return SingleChildScrollView(
       padding: EdgeInsets.fromLTRB(20, 20, 20, 120 + bottomInset),
       child: Column(
         children: [
-          ...widget.progressData.entries.toList().asMap().entries.map((entry) {
+          ..._subjectProgress.asMap().entries.map((entry) {
             int index = entry.key;
-            var data = entry.value;
+            final data = entry.value;
 
             return _animatedCard(
               index,
-              data.key,
-              data.value["quiz"],
-              data.value["progress"],
+              data.subjectTitle,
+              data.quizLabel,
+              data.progress,
             );
           }),
 
@@ -94,7 +107,8 @@ class _ProgressPageState extends State<ProgressPage> {
     );
 
     if (shouldReset == true) {
-      widget.onReset();
+      await ProgressManager.resetProgress();
+      await _loadProgress();
     }
   }
 

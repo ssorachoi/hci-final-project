@@ -52,9 +52,14 @@ class MyBottomNavBar extends StatelessWidget {
                 onPressed: () => onTabChange(2),
               ),
               GButton(
+                icon: Icons.task_alt_rounded,
+                text: 'Quests',
+                onPressed: () => onTabChange(3),
+              ),
+              GButton(
                 icon: Icons.person_rounded,
                 text: 'Profile',
-                onPressed: () => onTabChange(3),
+                onPressed: () => onTabChange(4),
               ),
             ],
             selectedIndex: selectedIndex,

@@ -122,6 +122,7 @@ class _LessonDetailScreenState extends State<LessonDetailScreen> {
                               builder: (context) => QuizScreen(
                                 problems: widget.lesson.quizProblems,
                                 themeColor: themeColor,
+                                lessonTitle: widget.lesson.title,
                               ),
                             ),
                           );
@@ -183,10 +184,7 @@ class LessonsScreen extends StatelessWidget {
                       height: 50,
                       fit: BoxFit.cover,
                     )
-                  : const Icon(
-                      Icons.menu_book_rounded,
-                      size: 32,
-                    ),
+                  : const Icon(Icons.menu_book_rounded, size: 32),
               title: Text(
                 lesson.title,
                 style: GoogleFonts.poppins(

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-class ProfilePage extends StatelessWidget {
+import '../local_storage.dart';
+
+class ProfilePage extends StatefulWidget {
   final List<String> avatars;
   final int selectedAvatar;
   final VoidCallback onChangeAvatar;
@@ -18,7 +20,43 @@ class ProfilePage extends StatelessWidget {
   });
 
   @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  int _level = 1;
+  int _exp = 0;
+  int _coins = 0;
+  String _displayName = 'Guest';
+  bool _loadingStats = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _loadStats();
+  }
+
+  Future<void> _loadStats() async {
+    final level = await LocalStorage.getLevel();
+    final exp = await LocalStorage.getExp();
+    final coins = await LocalStorage.getCoins();
+    final username = await LocalStorage.getCurrentUsername();
+
+    if (!mounted) return;
+    setState(() {
+      _level = level;
+      _exp = exp;
+      _coins = coins;
+      _displayName = username ?? 'Guest';
+      _loadingStats = false;
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final currentLevelFloor = (_level - 1) * 100;
+    final expInLevel = (_exp - currentLevelFloor).clamp(0, 100);
+
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -31,16 +69,18 @@ class ProfilePage extends StatelessWidget {
               children: [
                 CircleAvatar(
                   radius: 40,
-                  backgroundImage: AssetImage(avatars[selectedAvatar]),
+                  backgroundImage: AssetImage(
+                    widget.avatars[widget.selectedAvatar],
+                  ),
                 ),
                 const SizedBox(width: 16),
 
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Text(
-                      "Yamato",
-                      style: TextStyle(
+                    Text(
+                      _displayName,
+                      style: const TextStyle(
                         fontSize: 20,
                         color: Color.fromARGB(255, 0, 0, 0),
                       ),
@@ -49,7 +89,7 @@ class ProfilePage extends StatelessWidget {
                     const SizedBox(height: 8),
 
                     ElevatedButton(
-                      onPressed: onChangeAvatar,
+                      onPressed: widget.onChangeAvatar,
                       style: ElevatedButton.styleFrom(
                         backgroundColor: const Color(0xFF8AAEE0),
                         foregroundColor: Colors.black,
@@ -71,20 +111,40 @@ class ProfilePage extends StatelessWidget {
           Container(
             width: double.infinity,
             padding: const EdgeInsets.all(16),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  "• Quizzes Completed: 12",
-                  style: GoogleFonts.poppins(fontSize: 18),
-                ),
-                const SizedBox(height: 8),
-                Text(
-                  "• Badges Earned: 5",
-                  style: GoogleFonts.poppins(fontSize: 18),
-                ),
-              ],
-            ),
+            child: _loadingStats
+                ? const Center(child: CircularProgressIndicator())
+                : Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        '• Level: $_level',
+                        style: GoogleFonts.poppins(fontSize: 18),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '• Total EXP: $_exp',
+                        style: GoogleFonts.poppins(fontSize: 18),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        '• Coins: $_coins',
+                        style: GoogleFonts.poppins(fontSize: 18),
+                      ),
+                      const SizedBox(height: 12),
+                      LinearProgressIndicator(
+                        value: expInLevel / 100,
+                        minHeight: 10,
+                        borderRadius: BorderRadius.circular(999),
+                        backgroundColor: Colors.grey[300],
+                        color: const Color(0xFF395886),
+                      ),
+                      const SizedBox(height: 8),
+                      Text(
+                        'EXP to next level: $expInLevel / 100',
+                        style: GoogleFonts.poppins(fontSize: 12),
+                      ),
+                    ],
+                  ),
           ),
 
           const Divider(color: Colors.black),
@@ -93,7 +153,7 @@ class ProfilePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.symmetric(vertical: 16),
             child: ElevatedButton(
-              onPressed: onOpenSettings,
+              onPressed: widget.onOpenSettings,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(200, 50),
                 backgroundColor: const Color(0xFF8AAEE0),
@@ -118,7 +178,7 @@ class ProfilePage extends StatelessWidget {
           Padding(
             padding: const EdgeInsets.only(bottom: 80),
             child: ElevatedButton(
-              onPressed: onLogout,
+              onPressed: widget.onLogout,
               style: ElevatedButton.styleFrom(
                 minimumSize: const Size(220, 50),
                 backgroundColor: Colors.red,

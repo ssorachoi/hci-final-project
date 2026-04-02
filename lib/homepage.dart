@@ -1,49 +1,59 @@
 import 'dart:ui';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hci_final_project/login_wrapper.dart';
 import 'package:hci_final_project/widgets/bottom_nav_bar.dart';
-import 'package:hci_final_project/widgets/hover_scale.dart';
-import 'package:hci_final_project/data/lessons/linear_algebra.dart';
-import 'package:hci_final_project/data/lessons/integral_calculus.dart';
-import 'package:hci_final_project/data/lessons/physics.dart';
-import 'package:hci_final_project/data/lessons/chemistry.dart';
-import 'package:hci_final_project/models/lesson.dart';
 import 'local_storage.dart';
 import 'package:hci_final_project/home_pages/profile_page.dart';
 import 'package:hci_final_project/home_pages/subjects_page.dart';
 import 'package:hci_final_project/home_pages/progress_page.dart';
 import 'package:hci_final_project/home_pages/settings_page.dart';
+import 'package:hci_final_project/home_pages/quests_page.dart';
+import 'package:hci_final_project/home_pages/shop_page.dart';
+import 'package:hci_final_project/data/avatar_catalog.dart';
+import 'package:hci_final_project/progress_manager.dart';
 
-class _SubjectMeta {
-  final String title;
-  final String subtitle;
-  final String category;
-  final Color color;
-  final String iconPath;
-  final List<Lesson> lessons;
+class _SubjectPiePainter extends CustomPainter {
+  final List<SubjectProgressData> subjects;
+  final Map<String, Color> colors;
 
-  const _SubjectMeta({
-    required this.title,
-    required this.subtitle,
-    required this.category,
-    required this.color,
-    required this.iconPath,
-    required this.lessons,
-  });
-}
+  _SubjectPiePainter(this.subjects, this.colors);
 
-class _AchievementMeta {
-  final String title;
-  final String iconPath;
-  final String requirement;
+  @override
+  void paint(Canvas canvas, Size size) {
+    final rect = Rect.fromLTWH(0, 0, size.width, size.height);
+    final total = subjects.fold<double>(0, (sum, s) => sum + s.progress);
 
-  const _AchievementMeta({
-    required this.title,
-    required this.iconPath,
-    required this.requirement,
-  });
+    if (total <= 0) {
+      final paint = Paint()..color = const Color(0xFFCCD6E4);
+      canvas.drawArc(rect, -math.pi / 2, math.pi * 2, true, paint);
+      return;
+    }
+
+    var startAngle = -math.pi / 2;
+    for (final subject in subjects) {
+      final sweep = (subject.progress / total) * math.pi * 2;
+      final paint = Paint()
+        ..style = PaintingStyle.fill
+        ..color = colors[subject.subjectTitle] ?? const Color(0xFF9AA8BE);
+      canvas.drawArc(rect, startAngle, sweep, true, paint);
+      startAngle += sweep;
+    }
+
+    final holePaint = Paint()..color = const Color(0xFFF4F7FC);
+    canvas.drawCircle(
+      Offset(size.width / 2, size.height / 2),
+      size.width * 0.24,
+      holePaint,
+    );
+  }
+
+  @override
+  bool shouldRepaint(covariant _SubjectPiePainter oldDelegate) {
+    return oldDelegate.subjects != subjects || oldDelegate.colors != colors;
+  }
 }
 
 class HomeScreen extends StatefulWidget {
@@ -57,130 +67,28 @@ class _HomeScreenState extends State<HomeScreen> {
   int _selectedIndex = 0;
   bool _showHomeContent = true;
   bool _showSettingsContent = false;
+  bool _showShopContent = false;
 
   int _selectedAvatar = 0;
   int animationKey = 0;
-  TextEditingController? _searchController;
-  String _selectedCategory = "All";
 
-  final List<String> avatars = [
-    "assets/avatars/brook.JPG",
-    "assets/avatars/chopper.JPG",
-    "assets/avatars/franky.JPG",
-    "assets/avatars/jinbe.JPG",
-    "assets/avatars/luffy.JPG",
-    "assets/avatars/nami.JPG",
-    "assets/avatars/robin.JPG",
-    "assets/avatars/sanji.JPG",
-    "assets/avatars/usopp.JPG",
-    "assets/avatars/zoro.JPG",
-  ];
-
-  final Map<String, Map<String, dynamic>> progressData = {
-    "Linear Algebra": {"quiz": "7/15", "progress": 0.4667},
-    "Integral Calculus": {"quiz": "3/20", "progress": 0.15},
-    "Physics": {"quiz": "1/20", "progress": 0.05},
-    "Chemistry": {"quiz": "3/25", "progress": 0.12},
-  };
-
-  final List<_SubjectMeta> _subjects = [
-    _SubjectMeta(
-      title: "Linear Algebra",
-      subtitle: "Matrices, vectors, spaces",
-      category: "Algebra",
-      color: Color(0xFFFBF0F7),
-      iconPath: "assets/icons/linear.png",
-      lessons: linearAlgebraLessons,
-    ),
-    _SubjectMeta(
-      title: "Integral Calculus",
-      subtitle: "Integration, areas",
-      category: "Calculus",
-      color: Color(0xFFE2F2EF),
-      iconPath: "assets/icons/calculus.png",
-      lessons: integralCalculusLessons,
-    ),
-    _SubjectMeta(
-      title: "Physics",
-      subtitle: "Motion, energy, forces",
-      category: "Physics",
-      color: Color(0xFFF3F1EC),
-      iconPath: "assets/icons/physics.png",
-      lessons: physicsLessons,
-    ),
-    _SubjectMeta(
-      title: "Chemistry",
-      subtitle: "Atoms, reactions",
-      category: "Chemistry",
-      color: Color(0xFFFAF1C2),
-      iconPath: "assets/icons/chemistry.png",
-      lessons: chemistryLessons,
-    ),
-  ];
-
-  final List<_AchievementMeta> _achievements = const [
-    _AchievementMeta(
-      title: "First Lesson",
-      iconPath: "assets/onboardingscreen/badge.png",
-      requirement: "Complete your first lesson.",
-    ),
-    _AchievementMeta(
-      title: "Problem Solver",
-      iconPath: "assets/onboardingscreen/badge.png",
-      requirement: "Answer 10 quiz questions correctly.",
-    ),
-    _AchievementMeta(
-      title: "Consistency",
-      iconPath: "assets/onboardingscreen/badge.png",
-      requirement: "Study 3 days in a row.",
-    ),
-    _AchievementMeta(
-      title: "Science Explorer",
-      iconPath: "assets/onboardingscreen/badge.png",
-      requirement: "Finish a Physics lesson.",
-    ),
-  ];
-
-  List<_SubjectMeta> get _filteredSubjects {
-    _searchController ??= TextEditingController();
-    final query = _searchController?.text.trim().toLowerCase() ?? "";
-
-    return _subjects.where((subject) {
-      final matchesCategory =
-          _selectedCategory == "All" || subject.category == _selectedCategory;
-
-      if (!matchesCategory) {
-        return false;
-      }
-
-      if (query.isEmpty) {
-        return true;
-      }
-
-      final inTitle = subject.title.toLowerCase().contains(query);
-      final inSubtitle = subject.subtitle.toLowerCase().contains(query);
-      final inLessons = subject.lessons.any(
-        (lesson) => lesson.title.toLowerCase().contains(query),
-      );
-
-      return inTitle || inSubtitle || inLessons;
-    }).toList();
-  }
+  List<String> get avatars =>
+      avatarCatalog.map((item) => item.assetPath).toList();
 
   // Screens for each tab (you can replace later)
   List<Widget> get _pages => [
     Builder(builder: (context) => _homeContent(context)),
-    ProgressPage(
-      progressData: progressData,
-      onReset: () {
+    const ProgressPage(),
+    const SubjectsPage(),
+    QuestsPage(
+      onOpenShop: () {
         setState(() {
-          progressData.updateAll(
-            (key, value) => {"quiz": "0/0", "progress": 0.0},
-          );
+          _showHomeContent = false;
+          _showSettingsContent = false;
+          _showShopContent = true;
         });
       },
     ),
-    const SubjectsPage(),
     ProfilePage(
       avatars: avatars,
       selectedAvatar: _selectedAvatar,
@@ -200,6 +108,7 @@ class _HomeScreenState extends State<HomeScreen> {
       _selectedIndex = index;
       _showHomeContent = false;
       _showSettingsContent = false;
+      _showShopContent = false;
     });
   }
 
@@ -207,13 +116,15 @@ class _HomeScreenState extends State<HomeScreen> {
     int? bottomNavIndex,
     bool showHome = false,
     bool showSettings = false,
+    bool showShop = false,
   }) {
     setState(() {
       _showHomeContent = showHome;
       _showSettingsContent = showSettings;
+      _showShopContent = showShop;
       if (bottomNavIndex != null) {
         _selectedIndex = bottomNavIndex;
-      } else if (showHome || showSettings) {
+      } else if (showHome || showSettings || showShop) {
         _selectedIndex = 0;
       }
     });
@@ -256,84 +167,164 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _showAvatarPicker() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        int tempSelected = _selectedAvatar;
+    Future<void>(() async {
+      final currentLevel = await LocalStorage.getLevel();
+      final unlocked = await LocalStorage.getUnlockedAvatarIndices();
+      final isGuest = (await LocalStorage.getCurrentUsername()) == null;
 
-        return StatefulBuilder(
-          builder: (context, setModalState) {
-            return Dialog(
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      "Choose Avatar",
-                      style: TextStyle(
-                        fontSize: 18,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
-                    const Divider(),
+      if (!mounted) {
+        return;
+      }
 
-                    const SizedBox(height: 10),
+      showDialog(
+        context: context,
+        builder: (context) {
+          int tempSelected = _selectedAvatar;
 
-                    GridView.builder(
-                      shrinkWrap: true,
-                      itemCount: avatars.length,
-                      gridDelegate:
-                          const SliverGridDelegateWithFixedCrossAxisCount(
-                            crossAxisCount: 4,
-                            crossAxisSpacing: 10,
-                            mainAxisSpacing: 10,
-                          ),
-                      itemBuilder: (context, index) {
-                        final isSelected = tempSelected == index;
-
-                        return GestureDetector(
-                          onTap: () {
-                            setModalState(() {
-                              tempSelected = index;
-                            });
-                          },
-                          child: CircleAvatar(
-                            radius: 30,
-                            backgroundColor: isSelected
-                                ? Colors.blue
-                                : Colors.grey[300],
-                            child: CircleAvatar(
-                              radius: 26,
-                              backgroundImage: AssetImage(avatars[index]),
-                            ),
-                          ),
-                        );
-                      },
-                    ),
-
-                    const SizedBox(height: 16),
-
-                    ElevatedButton(
-                      onPressed: () {
-                        setState(() {
-                          _selectedAvatar = tempSelected;
-                        });
-                        Navigator.pop(context);
-                      },
-                      child: const Text("Save"),
-                    ),
-                  ],
+          return StatefulBuilder(
+            builder: (context, setModalState) {
+              return Dialog(
+                insetPadding: const EdgeInsets.symmetric(horizontal: 44),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
                 ),
-              ),
-            );
-          },
-        );
-      },
-    );
+                child: SizedBox(
+                  width: 320,
+                  child: Padding(
+                    padding: const EdgeInsets.all(12),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        const Text(
+                          "Choose Avatar",
+                          style: TextStyle(
+                            fontSize: 18,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        ),
+                        const Divider(),
+
+                        const SizedBox(height: 8),
+
+                        GridView.builder(
+                          shrinkWrap: true,
+                          physics: const NeverScrollableScrollPhysics(),
+                          itemCount: avatars.length,
+                          gridDelegate:
+                              const SliverGridDelegateWithFixedCrossAxisCount(
+                                crossAxisCount: 4,
+                                crossAxisSpacing: 8,
+                                mainAxisSpacing: 8,
+                                childAspectRatio: 1,
+                              ),
+                          itemBuilder: (context, index) {
+                            final item = avatarCatalog[index];
+                            final isSelected = tempSelected == index;
+                            final isUnlocked = unlocked.contains(index);
+                            final meetsLevel =
+                                currentLevel >= item.requiredLevel;
+                            final isLocked = !isUnlocked;
+
+                            return GestureDetector(
+                              onTap: () {
+                                if (isLocked) {
+                                  final reason = !meetsLevel
+                                      ? 'Level ${item.requiredLevel} required.'
+                                      : isGuest
+                                      ? 'Login required to unlock avatars.'
+                                      : 'Unlock this avatar in Shop.';
+                                  ScaffoldMessenger.of(context).showSnackBar(
+                                    SnackBar(content: Text(reason)),
+                                  );
+                                  return;
+                                }
+                                setModalState(() {
+                                  tempSelected = index;
+                                });
+                              },
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: 56,
+                                    height: 56,
+                                    child: CircleAvatar(
+                                      radius: 28,
+                                      backgroundColor: isSelected
+                                          ? Colors.blue
+                                          : Colors.grey[300],
+                                      child: CircleAvatar(
+                                        radius: 24,
+                                        backgroundImage: AssetImage(
+                                          avatars[index],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  if (isLocked)
+                                    SizedBox(
+                                      width: 56,
+                                      height: 56,
+                                      child: Container(
+                                        alignment: Alignment.center,
+                                        decoration: BoxDecoration(
+                                          color: Colors.black.withOpacity(0.45),
+                                          shape: BoxShape.circle,
+                                        ),
+                                        child: const Icon(
+                                          Icons.lock,
+                                          color: Colors.white,
+                                          size: 18,
+                                        ),
+                                      ),
+                                    ),
+                                ],
+                              ),
+                            );
+                          },
+                        ),
+
+                        const SizedBox(height: 12),
+
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            ElevatedButton(
+                              onPressed: () async {
+                                await LocalStorage.setSelectedAvatarIndex(
+                                  tempSelected,
+                                );
+                                setState(() {
+                                  _selectedAvatar = tempSelected;
+                                });
+                                if (context.mounted) {
+                                  Navigator.pop(context);
+                                }
+                              },
+                              child: const Text("Save"),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          );
+        },
+      );
+    });
+  }
+
+  Future<void> _loadSelectedAvatar() async {
+    final selected = await LocalStorage.getSelectedAvatarIndex();
+    if (!mounted) {
+      return;
+    }
+    setState(() {
+      _selectedAvatar = selected;
+    });
   }
 
   @override
@@ -351,14 +342,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   void initState() {
     super.initState();
-    _searchController = TextEditingController();
+    _loadSelectedAvatar();
   }
 
   @override
-  void dispose() {
-    _searchController?.dispose();
-    super.dispose();
-  }
+  void dispose() => super.dispose();
 
   @override
   Widget build(BuildContext context) {
@@ -408,9 +396,19 @@ class _HomeScreenState extends State<HomeScreen> {
                     onTap: () => _navigateFromDrawer(bottomNavIndex: 1),
                   ),
                   _buildDrawerItem(
+                    icon: Icons.task_alt_outlined,
+                    label: "Quests",
+                    onTap: () => _navigateFromDrawer(bottomNavIndex: 3),
+                  ),
+                  _buildDrawerItem(
+                    icon: Icons.storefront_outlined,
+                    label: "Shop",
+                    onTap: () => _navigateFromDrawer(showShop: true),
+                  ),
+                  _buildDrawerItem(
                     icon: Icons.account_circle_outlined,
                     label: "Profile",
-                    onTap: () => _navigateFromDrawer(bottomNavIndex: 3),
+                    onTap: () => _navigateFromDrawer(bottomNavIndex: 4),
                   ),
                   _buildDrawerItem(
                     icon: Icons.settings_outlined,
@@ -442,7 +440,16 @@ class _HomeScreenState extends State<HomeScreen> {
                 setState(() {
                   _showHomeContent = false;
                   _showSettingsContent = false;
+                  _showShopContent = false;
                   _selectedIndex = 2; // Subjects index
+                });
+              },
+            )
+          : _showShopContent
+          ? ShopPage(
+              onAvatarEquipped: (avatarIndex) {
+                setState(() {
+                  _selectedAvatar = avatarIndex;
                 });
               },
             )
@@ -457,385 +464,188 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Home Page
   Widget _homeContent(BuildContext context) {
-    final filteredSubjects = _filteredSubjects;
+    return FutureBuilder<Map<String, dynamic>>(
+      future: _loadDashboardData(),
+      builder: (context, snapshot) {
+        if (!snapshot.hasData) {
+          return const Center(child: CircularProgressIndicator());
+        }
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+        final username = snapshot.data!['username'] as String;
+        final progressSnapshot = snapshot.data!['snapshot'] as ProgressSnapshot;
+        final subjects = progressSnapshot.subjects;
+        final recentQuiz = progressSnapshot.recentQuiz;
+
+        return SingleChildScrollView(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'Welcome, $username',
+                style: GoogleFonts.poppins(
+                  fontSize: 28,
+                  fontWeight: FontWeight.w700,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Here is your learning snapshot.',
+                style: GoogleFonts.poppins(fontSize: 15, color: Colors.black54),
+              ),
+              const SizedBox(height: 18),
+              _buildPerformanceCard(subjects),
+              const SizedBox(height: 16),
+              _buildRecentQuizCard(recentQuiz),
+            ],
+          ),
+        );
+      },
+    );
+  }
+
+  Future<Map<String, dynamic>> _loadDashboardData() async {
+    final username = await LocalStorage.getCurrentUsername();
+    final snapshot = await ProgressManager.getProgressSnapshot();
+    return {'username': username ?? 'Guest', 'snapshot': snapshot};
+  }
+
+  Widget _buildPerformanceCard(List<SubjectProgressData> subjects) {
+    final hasAnyProgress = subjects.any((s) => s.progress > 0);
+    final chartData = hasAnyProgress
+        ? subjects
+        : subjects
+              .map(
+                (s) => SubjectProgressData(
+                  subjectTitle: s.subjectTitle,
+                  completedLessons: s.completedLessons,
+                  totalLessons: s.totalLessons,
+                  correctAnswers: s.correctAnswers,
+                  totalQuestions: s.totalQuestions,
+                  quizzesTaken: s.quizzesTaken,
+                  progress: 0.25,
+                ),
+              )
+              .toList();
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF4F7FC),
+        borderRadius: BorderRadius.circular(16),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          // 🔹 HERO
           Text(
-            "What would you like to learn today?",
+            'Subject Performance',
             style: GoogleFonts.poppins(
-              fontSize: 28,
-              fontWeight: FontWeight.w600,
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
             ),
           ),
-          const SizedBox(height: 6),
-          Text(
-            "Your daily dose of brain gains.",
-            style: GoogleFonts.poppins(fontSize: 16),
-          ),
-
-          const SizedBox(height: 20),
-
-          // 🔹 SEARCH
-          TextField(
-            controller: _searchController,
-            onChanged: (_) => setState(() {}),
-            decoration: InputDecoration(
-              hintText: "Search topics...",
-              prefixIcon: const Icon(Icons.search),
-              filled: true,
-              fillColor: Colors.grey[200],
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(30),
-                borderSide: BorderSide.none,
-              ),
-            ),
-          ),
-
-          const SizedBox(height: 15),
-
-          _achievementCard(),
-
           const SizedBox(height: 12),
-
-          // 🔹 CHIPS
-          SingleChildScrollView(
-            scrollDirection: Axis.horizontal,
-            child: Row(
-              children: [
-                _categoryChip("All"),
-                _categoryChip("Algebra"),
-                _categoryChip("Calculus"),
-                _categoryChip("Physics"),
-                _categoryChip("Chemistry"),
-              ],
-            ),
-          ),
-
-          const SizedBox(height: 20),
-
-          if (filteredSubjects.isEmpty)
-            Padding(
-              padding: const EdgeInsets.only(top: 8),
-              child: Text(
-                "No subjects match your search.",
-                style: GoogleFonts.poppins(fontSize: 14),
+          Center(
+            child: SizedBox(
+              width: 180,
+              height: 180,
+              child: CustomPaint(
+                painter: _SubjectPiePainter(chartData, _subjectChartColors),
               ),
             ),
+          ),
+          const SizedBox(height: 12),
+          ...subjects.map((subject) {
+            final percent = (subject.progress * 100).toStringAsFixed(0);
+            final color =
+                _subjectChartColors[subject.subjectTitle] ??
+                const Color(0xFF9AA8BE);
 
-          for (final subject in filteredSubjects) _subjectCard(subject),
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 6),
+              child: Row(
+                children: [
+                  Container(
+                    width: 10,
+                    height: 10,
+                    decoration: BoxDecoration(
+                      color: color,
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      subject.subjectTitle,
+                      style: GoogleFonts.poppins(fontSize: 13),
+                    ),
+                  ),
+                  Text(
+                    '$percent%',
+                    style: GoogleFonts.poppins(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+            );
+          }),
         ],
       ),
     );
   }
 
-  Widget _categoryChip(String text) {
-    final isSelected = _selectedCategory == text;
-
-    return Padding(
-      padding: const EdgeInsets.only(right: 10),
-      child: FilterChip(
-        selected: isSelected,
-        label: Text(text),
-        onSelected: (_) {
-          setState(() {
-            _selectedCategory = text;
-          });
-        },
-        backgroundColor: Colors.grey[200],
-        selectedColor: Colors.grey[300],
-        showCheckmark: false,
-        labelStyle: TextStyle(
-          color: Colors.black87,
-          fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-        ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-          side: BorderSide.none,
-        ),
-      ),
-    );
-  }
-
-  Widget _achievementCard() {
-    return GestureDetector(
-      onTap: _showAchievements,
-      child: HoverScale(
-        hoverScale: 1.03,
+  Widget _buildRecentQuizCard(QuizCompletionRecord? recentQuiz) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFEAF4EE),
         borderRadius: BorderRadius.circular(16),
-        child: Container(
-          width: double.infinity,
-          padding: const EdgeInsets.symmetric(vertical: 18, horizontal: 16),
-          decoration: BoxDecoration(
-            color: const Color(0xFF395886),
-            borderRadius: BorderRadius.circular(16),
-            boxShadow: [
-              BoxShadow(
-                color: Colors.black.withOpacity(0.12),
-                blurRadius: 10,
-                offset: const Offset(0, 6),
-              ),
-            ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Recently Completed Quiz',
+            style: GoogleFonts.poppins(
+              fontSize: 16,
+              fontWeight: FontWeight.w700,
+            ),
           ),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Image.asset(
-                "assets/onboardingscreen/badge.png",
-                width: 36,
-                height: 36,
+          const SizedBox(height: 8),
+          if (recentQuiz == null)
+            Text(
+              'No completed quizzes yet.',
+              style: GoogleFonts.poppins(fontSize: 13),
+            )
+          else ...[
+            Text(
+              recentQuiz.lessonTitle,
+              style: GoogleFonts.poppins(
+                fontSize: 15,
+                fontWeight: FontWeight.w600,
               ),
-              const SizedBox(height: 8),
-              Text(
-                "Achievements",
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w600,
-                  color: Colors.white,
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              '${recentQuiz.subjectTitle} • ${recentQuiz.correctAnswers}/${recentQuiz.totalQuestions} • ${recentQuiz.percentage}%',
+              style: GoogleFonts.poppins(fontSize: 13),
+            ),
+          ],
+        ],
       ),
     );
   }
 
-  void _showAchievements() {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final maxHeight = MediaQuery.of(context).size.height * 0.7;
-
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxHeight, maxWidth: 420),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          "Achievements",
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                        tooltip: "Close",
-                      ),
-                    ],
-                  ),
-                  const Divider(),
-                  const SizedBox(height: 6),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: List.generate(4, (index) {
-                      return Container(
-                        width: 52,
-                        height: 52,
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: Padding(
-                          padding: const EdgeInsets.all(10),
-                          child: Image.asset(
-                            "assets/onboardingscreen/badge.png",
-                          ),
-                        ),
-                      );
-                    }),
-                  ),
-                  const SizedBox(height: 24),
-                  Expanded(
-                    child: Center(
-                      child: Text(
-                        "No achievements yet",
-                        style: GoogleFonts.poppins(
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                          color: Colors.grey[600],
-                        ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
-
-  Widget _subjectCard(_SubjectMeta subject) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 16),
-      child: GestureDetector(
-        onTap: () => _showSubjectOverview(subject),
-        child: HoverScale(
-          hoverScale: 1.04,
-          borderRadius: BorderRadius.circular(16),
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: subject.color,
-              borderRadius: BorderRadius.circular(16),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.08),
-                  blurRadius: 12,
-                  offset: const Offset(0, 6),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Colors.white.withOpacity(0.6),
-                    borderRadius: BorderRadius.circular(12),
-                  ),
-                  child: Padding(
-                    padding: const EdgeInsets.all(8.0),
-                    child: Image.asset(subject.iconPath),
-                  ),
-                ),
-
-                const SizedBox(width: 16),
-
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        subject.title,
-                        style: const TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        subject.subtitle,
-                        style: const TextStyle(fontSize: 13),
-                      ),
-                    ],
-                  ),
-                ),
-
-                const Icon(Icons.arrow_forward_ios_rounded, size: 18),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-  }
-
-  void _showSubjectOverview(_SubjectMeta subject) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        final maxHeight = MediaQuery.of(context).size.height * 0.7;
-
-        return Dialog(
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(16),
-          ),
-          child: ConstrainedBox(
-            constraints: BoxConstraints(maxHeight: maxHeight, maxWidth: 420),
-            child: Padding(
-              padding: const EdgeInsets.all(16),
-              child: Column(
-                mainAxisSize: MainAxisSize.max,
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      Expanded(
-                        child: Text(
-                          subject.title,
-                          style: GoogleFonts.poppins(
-                            fontSize: 18,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
-                      ),
-                      IconButton(
-                        onPressed: () => Navigator.pop(context),
-                        icon: const Icon(Icons.close),
-                        tooltip: "Close",
-                      ),
-                    ],
-                  ),
-                  Text(
-                    subject.subtitle,
-                    style: GoogleFonts.poppins(fontSize: 14),
-                  ),
-                  const SizedBox(height: 12),
-                  const Divider(),
-                  const SizedBox(height: 6),
-                  Text(
-                    "Topics",
-                    style: GoogleFonts.poppins(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
-                  const SizedBox(height: 8),
-                  Expanded(
-                    child: Scrollbar(
-                      thumbVisibility: true,
-                      child: ListView.separated(
-                        itemCount: subject.lessons.length,
-                        separatorBuilder: (_, __) => const SizedBox(height: 8),
-                        itemBuilder: (context, index) {
-                          final lesson = subject.lessons[index];
-                          return Row(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Icon(Icons.circle, size: 8),
-                              const SizedBox(width: 10),
-                              Expanded(
-                                child: Text(
-                                  lesson.title,
-                                  style: GoogleFonts.poppins(fontSize: 13),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-        );
-      },
-    );
-  }
+  Map<String, Color> get _subjectChartColors => {
+    'Linear Algebra': const Color(0xFFDA6EA8),
+    'Integral Calculus': const Color(0xFF4EB39A),
+    'Physics': const Color(0xFF9E8C68),
+    'Chemistry': const Color(0xFFD8B84A),
+  };
 
   Widget _buildDrawerItem({
     required IconData icon,

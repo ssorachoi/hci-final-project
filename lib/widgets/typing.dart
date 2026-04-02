@@ -35,6 +35,7 @@ class _TypingQuestionState extends State<TypingQuestion> {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(widget.problem.question, style: const TextStyle(fontSize: 20)),
         const SizedBox(height: 30),

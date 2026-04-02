@@ -16,6 +16,7 @@ class MultipleChoiceQuestion extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
         Text(problem.question, style: const TextStyle(fontSize: 20)),
         const SizedBox(height: 30),
