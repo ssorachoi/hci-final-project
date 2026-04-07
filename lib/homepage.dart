@@ -3,6 +3,7 @@ import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:lottie/lottie.dart';
 import 'package:hci_final_project/login_wrapper.dart';
 import 'package:hci_final_project/theme/app_theme.dart';
 import 'package:hci_final_project/widgets/bottom_nav_bar.dart';
@@ -733,12 +734,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildAchievementsCard() {
-    final backgroundColor = Theme.of(context).colorScheme.surfaceVariant;
-    final useDarkText = backgroundColor.computeLuminance() > 0.7;
+    final backgroundColor = Theme.of(context).colorScheme.primary.withOpacity(0.25);
+    final useDarkText = true;
     final textColor = Theme.of(context).colorScheme.onSurface;
     final mutedTextColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.7);
-    final arrowButtonColor = Theme.of(context).colorScheme.surface;
-    final arrowIconColor = Theme.of(context).colorScheme.onSurface;
+    final arrowButtonColor = Theme.of(context).colorScheme.primary;
+    final arrowIconColor = Colors.white;
 
     return GestureDetector(
       onTap: () {
@@ -764,50 +765,43 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Row(
+                crossAxisAlignment: CrossAxisAlignment.center,
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: useDarkText
-                          ? Colors.white.withOpacity(0.7)
-                          : Colors.white.withOpacity(0.14),
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                    child: Text(
-                      'ACHIEVEMENTS',
-                      style: GoogleFonts.poppins(
-                        fontSize: 10,
-                        fontWeight: FontWeight.w600,
-                        color: useDarkText
-                            ? const Color(0xFF1F232B)
-                            : Colors.white,
-                        letterSpacing: 0.4,
-                      ),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          'Achievements',
+                          style: GoogleFonts.poppins(
+                            fontSize: 16,
+                            fontWeight: FontWeight.w700,
+                            color: textColor,
+                          ),
+                        ),
+                        const SizedBox(height: 6),
+                        Text(
+                          'View your unlocked achievements',
+                          style: GoogleFonts.poppins(
+                            fontSize: 12,
+                            color: mutedTextColor,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                  Icon(Icons.emoji_events_outlined, size: 28, color: arrowIconColor),
+                  const SizedBox(width: 4),
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: Lottie.network(
+                      'https://lottie.host/0ae84f73-fe39-4edf-a0b9-de502ef63de2/z6uGaXoXbn.lottie',
+                      fit: BoxFit.cover,
+                    ),
+                  ),
                 ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                'Achievements',
-                style: GoogleFonts.poppins(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: textColor,
-                ),
-              ),
-              const SizedBox(height: 6),
-              Text(
-                'View your unlocked achievements',
-                style: GoogleFonts.poppins(
-                  fontSize: 12,
-                  color: mutedTextColor,
-                ),
               ),
               const SizedBox(height: 14),
               Row(
@@ -820,18 +814,10 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: mutedTextColor,
                     ),
                   ),
-                  Container(
-                    width: 38,
-                    height: 38,
-                    decoration: BoxDecoration(
-                      color: arrowButtonColor,
-                      borderRadius: BorderRadius.circular(16),
-                    ),
-                    child: Icon(
-                      Icons.arrow_forward_rounded,
-                      size: 20,
-                      color: arrowIconColor,
-                    ),
+                  Icon(
+                    Icons.arrow_forward_rounded,
+                    size: 20,
+                    color: arrowIconColor,
                   ),
                 ],
               ),
