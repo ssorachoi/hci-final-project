@@ -6,6 +6,7 @@ import 'package:google_fonts/google_fonts.dart';
 import 'package:hci_final_project/login_wrapper.dart';
 import 'package:hci_final_project/theme/app_theme.dart';
 import 'package:hci_final_project/widgets/bottom_nav_bar.dart';
+import 'package:hci_final_project/widgets/hover_scale.dart';
 import 'local_storage.dart';
 import 'package:hci_final_project/home_pages/profile_page.dart';
 import 'package:hci_final_project/home_pages/subjects_page.dart';
@@ -136,6 +137,15 @@ class _HomeScreenState extends State<HomeScreen> {
     });
 
     Navigator.of(context).pop();
+  }
+
+  String _getAppBarTitle() {
+    if (_showSettingsContent) return 'Settings';
+    if (_showShopContent) return 'Shop';
+    if (_showAboutContent) return 'About';
+    
+    const titles = ['Home', 'Progress', 'Subjects', 'Quests', 'Profile'];
+    return titles[_selectedIndex];
   }
 
   Future<void> _confirmLogout() async {
@@ -360,20 +370,6 @@ class _HomeScreenState extends State<HomeScreen> {
       extendBody: true,
       backgroundColor: Theme.of(context).scaffoldBackgroundColor,
 
-      appBar: AppBar(
-        centerTitle: true,
-        backgroundColor: Theme.of(context).colorScheme.primary,
-        title: Text(
-          "MathMaster",
-          style: GoogleFonts.poppins(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
-          ),
-        ),
-        actions: const [ThemeToggleButton()],
-      ),
-
       drawer: Drawer(
         backgroundColor: Colors.transparent,
         child: ClipRRect(
@@ -385,7 +381,21 @@ class _HomeScreenState extends State<HomeScreen> {
                 children: [
                   DrawerHeader(
                     decoration: BoxDecoration(color: Colors.transparent),
-                    child: Image.asset("assets/logo.png"),
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Image.asset("assets/logo.png", height: 60),
+                        const SizedBox(height: 12),
+                        Text(
+                          "DASHBOARD",
+                          style: GoogleFonts.poppins(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: const Color(0xFF395886),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                   _buildDrawerItem(
                     icon: Icons.home_outlined,
@@ -439,31 +449,82 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
       ),
 
-      body: _showHomeContent
-          ? _homeContent(context)
-          : _showSettingsContent
-          ? SettingsPage(
-              onGoToSubjects: () {
-                setState(() {
-                  _showHomeContent = false;
-                  _showSettingsContent = false;
-                  _showShopContent = false;
-                  _showAboutContent = false;
-                  _selectedIndex = 2; // Subjects index
-                });
-              },
-            )
-          : _showShopContent
-          ? ShopPage(
-              onAvatarEquipped: (avatarIndex) {
-                setState(() {
-                  _selectedAvatar = avatarIndex;
-                });
-              },
-            )
-          : _showAboutContent
-          ? const AboutPage()
-          : _pages[_selectedIndex],
+      body: Column(
+        children: [
+          // Custom Header with Burger, Dashboard, and Dark Mode
+          Container(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                Builder(
+                  builder: (context) => IconButton(
+                    icon: const Icon(Icons.menu),
+                    onPressed: () => Scaffold.of(context).openDrawer(),
+                  ),
+                ),
+                Expanded(
+                  child: Padding(
+                    padding: const EdgeInsets.only(left: 16),
+                    child: Text(
+                      _getAppBarTitle(),
+                      textAlign: TextAlign.center,
+                      style: GoogleFonts.poppins(
+                        fontSize: 25,
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Transform.rotate(
+                    angle: -0.35,
+                    child: const Icon(Icons.nightlight_round),
+                  ),
+                  onPressed: () => themeController.toggle(),
+                  style: IconButton.styleFrom(
+                    shape: CircleBorder(
+                      side: BorderSide(
+                        color: Theme.of(context).iconTheme.color ?? Colors.grey,
+                        width: 1,
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 8),
+              ],
+            ),
+          ),
+          // Content
+          Expanded(
+            child: _showHomeContent
+                ? _homeContent(context)
+                : _showSettingsContent
+                ? SettingsPage(
+                    onGoToSubjects: () {
+                      setState(() {
+                        _showHomeContent = false;
+                        _showSettingsContent = false;
+                        _showShopContent = false;
+                        _showAboutContent = false;
+                        _selectedIndex = 2; // Subjects index
+                      });
+                    },
+                  )
+                : _showShopContent
+                ? ShopPage(
+                    onAvatarEquipped: (avatarIndex) {
+                      setState(() {
+                        _selectedAvatar = avatarIndex;
+                      });
+                    },
+                  )
+                : _showAboutContent
+                ? const AboutPage()
+                : _pages[_selectedIndex],
+          ),
+        ],
+      ),
 
       bottomNavigationBar: MyBottomNavBar(
         selectedIndex: _selectedIndex,
@@ -494,7 +555,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 'Welcome, $username',
                 style: GoogleFonts.poppins(
-                  fontSize: 28,
+                  fontSize: 24,
                   fontWeight: FontWeight.w700,
                   color: Theme.of(context).colorScheme.onSurface,
                 ),
@@ -510,6 +571,8 @@ class _HomeScreenState extends State<HomeScreen> {
                 ),
               ),
               const SizedBox(height: 18),
+              _buildAchievementsCard(),
+              const SizedBox(height: 16),
               _buildPerformanceCard(subjects),
               const SizedBox(height: 16),
               _buildRecentQuizCard(recentQuiz),
@@ -665,6 +728,116 @@ class _HomeScreenState extends State<HomeScreen> {
             ),
           ],
         ],
+      ),
+    );
+  }
+
+  Widget _buildAchievementsCard() {
+    final backgroundColor = Theme.of(context).colorScheme.surfaceVariant;
+    final useDarkText = backgroundColor.computeLuminance() > 0.7;
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final mutedTextColor = Theme.of(context).colorScheme.onSurface.withOpacity(0.7);
+    final arrowButtonColor = Theme.of(context).colorScheme.surface;
+    final arrowIconColor = Theme.of(context).colorScheme.onSurface;
+
+    return GestureDetector(
+      onTap: () {
+        // TODO: Navigate to achievements page or show achievements dialog
+      },
+      child: HoverScale(
+        hoverScale: 1.02,
+        borderRadius: BorderRadius.circular(22),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            color: backgroundColor,
+            borderRadius: BorderRadius.circular(22),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.1),
+                blurRadius: 12,
+                offset: const Offset(0, 8),
+              ),
+            ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 10,
+                      vertical: 6,
+                    ),
+                    decoration: BoxDecoration(
+                      color: useDarkText
+                          ? Colors.white.withOpacity(0.7)
+                          : Colors.white.withOpacity(0.14),
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    child: Text(
+                      'ACHIEVEMENTS',
+                      style: GoogleFonts.poppins(
+                        fontSize: 10,
+                        fontWeight: FontWeight.w600,
+                        color: useDarkText
+                            ? const Color(0xFF1F232B)
+                            : Colors.white,
+                        letterSpacing: 0.4,
+                      ),
+                    ),
+                  ),
+                  Icon(Icons.emoji_events_outlined, size: 28, color: arrowIconColor),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Text(
+                'Achievements',
+                style: GoogleFonts.poppins(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w700,
+                  color: textColor,
+                ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'View your unlocked achievements',
+                style: GoogleFonts.poppins(
+                  fontSize: 12,
+                  color: mutedTextColor,
+                ),
+              ),
+              const SizedBox(height: 14),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'View all',
+                    style: GoogleFonts.poppins(
+                      fontSize: 12,
+                      color: mutedTextColor,
+                    ),
+                  ),
+                  Container(
+                    width: 38,
+                    height: 38,
+                    decoration: BoxDecoration(
+                      color: arrowButtonColor,
+                      borderRadius: BorderRadius.circular(16),
+                    ),
+                    child: Icon(
+                      Icons.arrow_forward_rounded,
+                      size: 20,
+                      color: arrowIconColor,
+                    ),
+                  ),
+                ],
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
