@@ -131,7 +131,7 @@ class _QuestsPageState extends State<QuestsPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,
@@ -152,7 +152,7 @@ class _QuestsPageState extends State<QuestsPage> {
               width: double.infinity,
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surfaceVariant,
+                color: Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(12),
                 border: Border.all(
                   color: Theme.of(context).colorScheme.primary,
@@ -180,7 +180,7 @@ class _QuestsPageState extends State<QuestsPage> {
             width: double.infinity,
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surfaceVariant,
+              color: Theme.of(context).colorScheme.surfaceContainerHighest,
               borderRadius: BorderRadius.circular(10),
             ),
             child: Text(
@@ -219,7 +219,7 @@ class _QuestsPageState extends State<QuestsPage> {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(16),
-        color: Theme.of(context).colorScheme.surfaceVariant,
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

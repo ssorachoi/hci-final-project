@@ -281,7 +281,7 @@ class _QuizResultsScreenState extends State<QuizResultsScreen> {
               decoration: BoxDecoration(
                 color: Theme.of(
                   context,
-                ).colorScheme.surfaceVariant.withOpacity(0.4),
+                ).colorScheme.surfaceContainerHighest.withOpacity(0.4),
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(

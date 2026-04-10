@@ -197,7 +197,7 @@ class LessonsScreen extends StatelessWidget {
           return Card(
             margin: const EdgeInsets.only(bottom: 12),
             color: Theme.of(context).brightness == Brightness.dark
-                ? Theme.of(context).colorScheme.surfaceVariant
+                ? Theme.of(context).colorScheme.surfaceContainerHighest
                 : themeColor,
             child: ListTile(
               leading: lesson.imagePath != null

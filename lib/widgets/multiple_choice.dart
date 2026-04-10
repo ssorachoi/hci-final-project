@@ -36,7 +36,7 @@ class MultipleChoiceQuestion extends StatelessWidget {
                 minimumSize: const Size(double.infinity, 50),
                 backgroundColor: selectedAnswer == option
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceVariant,
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               child: Text(
                 option,

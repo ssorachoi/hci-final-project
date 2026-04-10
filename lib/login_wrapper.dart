@@ -3,8 +3,6 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:hci_final_project/homepage.dart';
-import 'package:hci_final_project/progress_manager.dart';
-import 'package:hci_final_project/quest_manager.dart';
 import 'package:hci_final_project/screens/createaccountscreen.dart';
 import 'local_storage.dart';
 
@@ -195,11 +193,6 @@ class _LoginScreenState extends State<LoginScreen> {
   void _guestLogin() async {
     await LocalStorage.setLoggedIn(true);
     await LocalStorage.clearCurrentUsername();
-    await QuestManager.resetGuestQuestState();
-    await ProgressManager.resetGuestProgress();
-    await LocalStorage.setExp(0);
-    await LocalStorage.setCoins(0);
-    await LocalStorage.setLevel(1);
     Navigator.pushReplacement(
       context,
       MaterialPageRoute(builder: (context) => const HomeScreen()),
@@ -217,7 +210,9 @@ class _LoginScreenState extends State<LoginScreen> {
         width: double.infinity,
         height: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
-        decoration: BoxDecoration(color: Theme.of(context).colorScheme.surface),
+        decoration: BoxDecoration(
+          color: Theme.of(context).colorScheme.surface,
+        ),
         child: Center(
           child: ScrollConfiguration(
             behavior: ScrollConfiguration.of(
@@ -227,7 +222,7 @@ class _LoginScreenState extends State<LoginScreen> {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Image.asset('assets/logo.png', height: 80),
+                  Image.asset('logo.png', height: 80),
                   const SizedBox(height: 10),
                   Text(
                     "MATHMASTER",
@@ -320,9 +315,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         style: GoogleFonts.inter(
                           fontSize: 12,
                           fontWeight: FontWeight.w500,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -349,9 +345,10 @@ class _LoginScreenState extends State<LoginScreen> {
                         "Don't have an account? ",
                         style: GoogleFonts.inter(
                           fontSize: 12,
-                          color: Theme.of(
-                            context,
-                          ).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withOpacity(0.6),
                         ),
                       ),
                       TextButton(
@@ -410,7 +407,10 @@ class _LoginScreenState extends State<LoginScreen> {
             hintText: hint,
             hintStyle: GoogleFonts.inter(
               fontSize: 14,
-              color: Theme.of(context).colorScheme.onSurface.withOpacity(0.55),
+              color: Theme.of(context)
+                  .colorScheme
+                  .onSurface
+                  .withOpacity(0.55),
             ),
             border: InputBorder.none,
             contentPadding: const EdgeInsets.symmetric(

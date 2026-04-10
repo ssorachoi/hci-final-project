@@ -155,7 +155,7 @@ class _ProgressPageState extends State<ProgressPage> {
         padding: const EdgeInsets.all(15),
         decoration: BoxDecoration(
             color: Theme.of(context).brightness == Brightness.dark
-                ? Theme.of(context).colorScheme.surfaceVariant
+                ? Theme.of(context).colorScheme.surfaceContainerHighest
                 : cardColor,
           borderRadius: BorderRadius.circular(16),
           boxShadow: [

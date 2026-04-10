@@ -100,7 +100,7 @@ class _DragDropQuestionState extends State<DragDropQuestion> {
                 ),
                 childWhenDragging: Container(
                   padding: const EdgeInsets.all(12),
-                  color: Theme.of(context).colorScheme.surfaceVariant,
+                  color: Theme.of(context).colorScheme.surfaceContainerHighest,
                   child: Text(
                     option,
                     style: TextStyle(
@@ -150,7 +150,7 @@ class _DragDropQuestionState extends State<DragDropQuestion> {
                     alignment: Alignment.center,
                     decoration: BoxDecoration(
                       color: candidateData.isEmpty
-                          ? Theme.of(context).colorScheme.surfaceVariant
+                          ? Theme.of(context).colorScheme.surfaceContainerHighest
                           : Theme.of(context).colorScheme.primaryContainer,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(

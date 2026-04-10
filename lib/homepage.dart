@@ -594,6 +594,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
               const SizedBox(height: 18),
               _buildAchievementsCard(),
+              const SizedBox(height: 12),
+              _buildMiniCalendarStrip(),
               const SizedBox(height: 16),
               _buildPerformanceCard(subjects),
               const SizedBox(height: 16),
@@ -842,6 +844,86 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ),
       ),
+    );
+  }
+
+  Widget _buildMiniCalendarStrip() {
+    final now = DateTime.now();
+    final startOfWeek = now.subtract(Duration(days: now.weekday - 1));
+    final days = List.generate(7, (index) {
+      return startOfWeek.add(Duration(days: index));
+    });
+
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surfaceContainerHighest,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 10,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: days.map((day) {
+          final isToday =
+              day.year == now.year &&
+              day.month == now.month &&
+              day.day == now.day;
+          return _buildCalendarDayChip(day, isToday: isToday);
+        }).toList(),
+      ),
+    );
+  }
+
+  Widget _buildCalendarDayChip(DateTime day, {required bool isToday}) {
+    final dayLabel = ['M', 'T', 'W', 'T', 'F', 'S', 'S'][day.weekday - 1];
+    final textColor = Theme.of(context).colorScheme.onSurface;
+    final mutedText = textColor.withOpacity(0.6);
+    final chipColor = isToday ? const Color(0xFF1F232B) : Colors.white;
+    final chipTextColor = isToday ? Colors.white : textColor;
+
+    return Column(
+      children: [
+        Text(
+          dayLabel,
+          style: GoogleFonts.poppins(
+            fontSize: 11,
+            fontWeight: FontWeight.w600,
+            color: mutedText,
+          ),
+        ),
+        const SizedBox(height: 6),
+        Container(
+          width: 36,
+          height: 36,
+          alignment: Alignment.center,
+          decoration: BoxDecoration(
+            color: chipColor,
+            shape: BoxShape.circle,
+            boxShadow: [
+              if (isToday)
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.2),
+                  blurRadius: 8,
+                  offset: const Offset(0, 4),
+                ),
+            ],
+          ),
+          child: Text(
+            '${day.day}',
+            style: GoogleFonts.poppins(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: chipTextColor,
+            ),
+          ),
+        ),
+      ],
     );
   }
 

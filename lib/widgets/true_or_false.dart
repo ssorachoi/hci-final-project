@@ -36,7 +36,7 @@ class TrueFalseQuestion extends StatelessWidget {
                 minimumSize: const Size(120, 50),
                 backgroundColor: selectedAnswer == option
                     ? Theme.of(context).colorScheme.primary
-                    : Theme.of(context).colorScheme.surfaceVariant,
+                    : Theme.of(context).colorScheme.surfaceContainerHighest,
               ),
               child: Text(
                 option,
