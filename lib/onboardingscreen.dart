@@ -158,10 +158,9 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                           textAlign: TextAlign.center,
                           style: GoogleFonts.inter(
                             fontSize: 16,
-                            color: Theme.of(context)
-                                .colorScheme
-                                .onSurface
-                                .withOpacity(0.7),
+                            color: Theme.of(
+                              context,
+                            ).colorScheme.onSurface.withOpacity(0.7),
                           ),
                         ),
                       ],
@@ -176,25 +175,8 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
             // ==========================================
             Padding(
               padding: const EdgeInsets.all(20.0),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              child: Column(
                 children: [
-                  // HCI Principle: User Control. Let the user skip if they want to.
-                  TextButton(
-                    onPressed: () {
-                      _controller.jumpToPage(contents.length - 1);
-                    },
-                    child: Text(
-                      "SKIP",
-                      style: TextStyle(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.6),
-                      ),
-                    ),
-                  ),
-
                   // Shows the dots we built earlier
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
@@ -203,37 +185,88 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                       (index) => buildDot(index, context),
                     ),
                   ),
-
-                  // The main Call to Action button (NEXT / START)
-                  ElevatedButton(
-                    onPressed: () async {
-                      if (currentIndex == contents.length - 1) {
-                        await LocalStorage.setHasSeenOnboarding(true);
-                        if (!mounted) return;
-                        Navigator.pushReplacement(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => const LoginScreen(),
+                  const SizedBox(height: 25),
+                  // Buttons container centered
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      // HCI Principle: User Control. Let the user skip if they want to.
+                      ElevatedButton(
+                        onPressed: () {
+                          _controller.jumpToPage(contents.length - 1);
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.1),
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onSurface.withOpacity(0.7),
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 40,
+                            vertical: 16,
                           ),
-                        );
-                      } else {
-                        // Animate to the next screen smoothly
-                        _controller.nextPage(
-                          duration: const Duration(milliseconds: 300),
-                          curve: Curves.easeInOut,
-                        );
-                      }
-                    },
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: Theme.of(context).colorScheme.primary,
-                      foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(20),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(35),
+                          ),
+                          minimumSize: const Size(120, 56),
+                        ),
+                        child: Text(
+                          "SKIP",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
                       ),
-                    ),
-                    child: Text(
-                      currentIndex == contents.length - 1 ? "START" : "NEXT",
-                    ),
+                      const SizedBox(width: 80),
+                      // The main Call to Action button (NEXT / START)
+                      ElevatedButton(
+                        onPressed: () async {
+                          if (currentIndex == contents.length - 1) {
+                            await LocalStorage.setHasSeenOnboarding(true);
+                            if (!mounted) return;
+                            Navigator.pushReplacement(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => const LoginScreen(),
+                              ),
+                            );
+                          } else {
+                            // Animate to the next screen smoothly
+                            _controller.nextPage(
+                              duration: const Duration(milliseconds: 300),
+                              curve: Curves.easeInOut,
+                            );
+                          }
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Theme.of(
+                            context,
+                          ).colorScheme.primary,
+                          foregroundColor: Theme.of(
+                            context,
+                          ).colorScheme.onPrimary,
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 50,
+                            vertical: 16,
+                          ),
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(35),
+                          ),
+                          minimumSize: const Size(140, 56),
+                        ),
+                        child: Text(
+                          currentIndex == contents.length - 1
+                              ? "START"
+                              : "NEXT",
+                          style: GoogleFonts.poppins(
+                            fontWeight: FontWeight.w600,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ],
               ),
